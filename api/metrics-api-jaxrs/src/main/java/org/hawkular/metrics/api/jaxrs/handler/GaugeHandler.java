@@ -21,9 +21,10 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.badRequest;
 import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.executeAsync;
+import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.noContent;
 
 import java.net.URI;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import com.wordnik.swagger.annotations.ApiParam;
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import org.hawkular.metrics.api.jaxrs.ApiError;
 import org.hawkular.metrics.api.jaxrs.callback.MetricCreatedCallback;
 import org.hawkular.metrics.api.jaxrs.param.Duration;
@@ -64,15 +73,7 @@ import org.hawkular.metrics.core.api.Metric;
 import org.hawkular.metrics.core.api.MetricId;
 import org.hawkular.metrics.core.api.MetricType;
 import org.hawkular.metrics.core.api.MetricsService;
-
-import com.google.common.base.Function;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiParam;
-import com.wordnik.swagger.annotations.ApiResponse;
-import com.wordnik.swagger.annotations.ApiResponses;
+import rx.Observable;
 
 /**
  * @author Stefan Negrea
@@ -201,17 +202,20 @@ public class GaugeHandler {
             @Suspended final AsyncResponse asyncResponse,
             @HeaderParam("tenantId") final String tenantId,
             @PathParam("id") String id,
-            @ApiParam(value = "List of datapoints containing timestamp and value", required = true)
+            @ApiParam(value = "List of data points containing timestamp and value", required = true)
                 List<GaugeData> data) {
-        executeAsync(asyncResponse, () -> {
-            if (data == null) {
-                return ApiUtils.emptyPayload();
-            }
+
+        if (data.isEmpty()) {
+            asyncResponse.resume(badRequest(new ApiError("Payload is empty")));
+        } else {
             Gauge metric = new Gauge(tenantId, new MetricId(id));
             metric.getData().addAll(data);
-            ListenableFuture<Void> future = metricsService.addGaugeData(Collections.singletonList(metric));
-            return Futures.transform(future, ApiUtils.MAP_VOID);
-        });
+            Observable<Void> observable = metricsService.addGaugeData(Observable.just(metric));
+            observable.subscribe(
+                    noArg -> {},
+                    t -> asyncResponse.resume(Response.serverError().entity(new ApiError(t.getMessage())).build()),
+                    () -> asyncResponse.resume(Response.ok().build()));
+        }
     }
 
     @POST
@@ -223,14 +227,17 @@ public class GaugeHandler {
                 response = ApiError.class) })
     public void addGaugeData(@Suspended final AsyncResponse asyncResponse, @HeaderParam("tenantId") String tenantId,
             @ApiParam(value = "List of metrics", required = true) List<Gauge> metrics) {
-        executeAsync(asyncResponse, () -> {
-            if (metrics.isEmpty()) {
-                return Futures.immediateFuture(Response.ok().build());
-            }
+
+        if (metrics.isEmpty()) {
+            asyncResponse.resume(badRequest(new ApiError("Payload is empty")));
+        } else {
             metrics.forEach(m -> m.setTenantId(tenantId));
-            ListenableFuture<Void> future = metricsService.addGaugeData(metrics);
-            return Futures.transform(future, ApiUtils.MAP_VOID);
-        });
+            Observable<Void> observable = metricsService.addGaugeData(Observable.from(metrics));
+            observable.subscribe(
+                    noArg -> {},
+                    t -> asyncResponse.resume(Response.serverError().entity(new ApiError(t.getMessage())).build()),
+                    () -> asyncResponse.resume(Response.ok().build()));
+        }
     }
 
     @GET
@@ -271,44 +278,59 @@ public class GaugeHandler {
             @ApiParam(value = "Defaults to now") @QueryParam("end") final Long end,
             @ApiParam(value = "Total number of buckets") @QueryParam("buckets") Integer bucketsCount,
             @ApiParam(value = "Bucket duration") @QueryParam("bucketDuration") Duration bucketDuration) {
-        executeAsync(
-                asyncResponse,
-                () -> {
-                    long now = System.currentTimeMillis();
-                    long startTime = start == null ? now - EIGHT_HOURS : start;
-                    long endTime = end == null ? now : end;
 
-                    Gauge metric = new Gauge(tenantId, new MetricId(id));
-
-                    if (bucketsCount == null && bucketDuration == null) {
-                        ListenableFuture<List<GaugeData>> dataFuture = metricsService.findGaugeData(tenantId,
-                                new MetricId(id), startTime, endTime);
-                        return Futures.transform(dataFuture, ApiUtils.MAP_COLLECTION);
-                    }
-
-                    if (bucketsCount != null && bucketDuration != null) {
-                        return badRequest(new ApiError("Both buckets and bucketDuration parameters are used"));
-                    }
-
-                    Buckets buckets;
-                    try {
-                        if (bucketsCount != null) {
-                            buckets = Buckets.fromCount(startTime, endTime, bucketsCount);
+        if (bucketsCount == null && bucketDuration == null) {
+            long now = System.currentTimeMillis();
+            long startTime = start == null ? now - EIGHT_HOURS : start;
+            long endTime = end == null ? now : end;
+            Observable<GaugeData> observable = metricsService.findGaugeData(tenantId, new MetricId(id), startTime,
+                    endTime);
+            List<GaugeData> dataPoints = new ArrayList<>();
+            observable.subscribe(
+                    dataPoints::add,
+                    t -> asyncResponse.resume(Response.serverError().entity(new ApiError(t.getMessage())).build()),
+                    () -> {
+                        if (dataPoints.isEmpty()) {
+                            asyncResponse.resume(noContent());
                         } else {
-                            buckets = Buckets.fromStep(startTime, endTime, bucketDuration.toMillis());
+                            asyncResponse.resume(Response.ok(dataPoints).build());
                         }
-                    } catch (IllegalArgumentException e) {
-                        return badRequest(new ApiError("Bucket: " + e.getMessage()));
                     }
+            );
+        } else {
+            executeAsync(
+                    asyncResponse,
+                    () -> {
+                        long now = System.currentTimeMillis();
+                        long startTime = start == null ? now - EIGHT_HOURS : start;
+                        long endTime = end == null ? now : end;
 
-                    ListenableFuture<BucketedOutput<GaugeBucketDataPoint>> dataFuture;
-                    dataFuture = metricsService.findGaugeStats(metric, startTime, endTime, buckets);
+                        Gauge metric = new Gauge(tenantId, new MetricId(id));
 
-                    ListenableFuture<List<GaugeBucketDataPoint>> outputFuture;
-                    outputFuture = Futures.transform(dataFuture, BucketedOutput<GaugeBucketDataPoint>::getData);
+                        if (bucketsCount != null && bucketDuration != null) {
+                            return badRequest(new ApiError("Both buckets and bucketDuration parameters are used"));
+                        }
 
-                    return Futures.transform(outputFuture, ApiUtils.MAP_COLLECTION);
-                });
+                        Buckets buckets;
+                        try {
+                            if (bucketsCount != null) {
+                                buckets = Buckets.fromCount(startTime, endTime, bucketsCount);
+                            } else {
+                                buckets = Buckets.fromStep(startTime, endTime, bucketDuration.toMillis());
+                            }
+                        } catch (IllegalArgumentException e) {
+                            return badRequest(new ApiError("Bucket: " + e.getMessage()));
+                        }
+
+                        ListenableFuture<BucketedOutput<GaugeBucketDataPoint>> dataFuture;
+                        dataFuture = metricsService.findGaugeStats(metric, startTime, endTime, buckets);
+
+                        ListenableFuture<List<GaugeBucketDataPoint>> outputFuture;
+                        outputFuture = Futures.transform(dataFuture, BucketedOutput<GaugeBucketDataPoint>::getData);
+
+                        return Futures.transform(outputFuture, ApiUtils.MAP_COLLECTION);
+                    });
+        }
     }
 
     @GET
