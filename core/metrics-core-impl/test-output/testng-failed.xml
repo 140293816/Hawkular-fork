@@ -5,10 +5,8 @@
     <classes>
       <class name="org.hawkular.metrics.core.impl.cassandra.DataAccessITest">
         <methods>
-          <include name="insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets"/>
-          <include name="insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets"/>
+          <include name="getMetricTags"/>
           <include name="initMethod"/>
-          <include name="insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket"/>
           <include name="initClass"/>
         </methods>
       </class> <!-- org.hawkular.metrics.core.impl.cassandra.DataAccessITest -->

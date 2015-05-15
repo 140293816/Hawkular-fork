@@ -146,7 +146,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test
-    public void insertAndFindGaugeRawDataWithTwoBucket() throws Exception {
+    public void insertAndFindGaugeRawDataWithTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
         
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
@@ -167,7 +167,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test
-    public void insertAndFindGaugeRawDataWithThreeBucket() throws Exception {
+    public void insertAndFindGaugeRawDataWithThreeBuckets() throws Exception {
         DateTime start = now().minusMonths(2);
         
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
@@ -208,7 +208,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test
-    public void insertAndFindGaugeRawDataByGaugeWithTwoBucket() throws Exception {
+    public void insertAndFindGaugeRawDataByGaugeWithTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
         
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
@@ -228,7 +228,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test
-    public void insertAndFindGaugeRawDataByGaugeWithThreeBucket() throws Exception {
+    public void insertAndFindGaugeRawDataByGaugeWithThreeBuckets() throws Exception {
         DateTime start = now().minusMonths(2);
         
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
@@ -505,7 +505,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test
-    public void insertAndFindAvailabilitiesInTwoBucket() throws Exception {
+    public void insertAndFindAvailabilitiesInTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
         String tenantId = "avail-test";
         Availability metric = new Availability(tenantId, new MetricId("m1"));
@@ -526,7 +526,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test
-    public void insertAndFindAvailabilitiesInThreeBucket() throws Exception {
+    public void insertAndFindAvailabilitiesInThreeBuckets() throws Exception {
         DateTime start = now().minusMonths(3);
         String tenantId = "avail-test";
         Availability metric = new Availability(tenantId, new MetricId("m1"));
@@ -629,7 +629,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test 
-    public void insertAndFindAvailbilitiesWithWriteTimeInTwoBucket() throws Exception{
+    public void insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets() throws Exception{
         DateTime start = now().minusMonths(1);
         
         Availability metric = new Availability("avail-test", new MetricId("m1"));
@@ -649,7 +649,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test 
-    public void insertAndFindAvailbilitiesWithWriteTimeInThreeBucket() throws Exception{
+    public void insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets() throws Exception{
         DateTime start = now().minusMonths(2);
         
         Availability metric = new Availability("avail-test", new MetricId("m1"));
@@ -704,7 +704,7 @@ public class DataAccessITest extends MetricsITest {
     }
     
     @Test
-    public void findNumericMeytricsWithTwoBuckets() throws Exception{
+    public void findGuageMeytricsWithTwoBuckets() throws Exception{
         DateTime start = now().minusMonths(1);
         
         Gauge metric1 = new Gauge("tenant-1", new MetricId("metric-1"));
@@ -748,7 +748,7 @@ public class DataAccessITest extends MetricsITest {
         
     
     @Test
-    public void deleteNumericMetrics() throws Exception {
+    public void deleteGuageMetrics() throws Exception {
         DateTime start = now().minusMinutes(10);  
         
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));     
@@ -763,6 +763,7 @@ public class DataAccessITest extends MetricsITest {
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
        
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
+        
         List<Row> rows = queryFuture.get().all();
         assertEquals(rows.size(),1,"wrong metric numbers");
         assertEquals(rows.get(0).getString("metric"),"metric-1","wrong metric id");
@@ -772,6 +773,36 @@ public class DataAccessITest extends MetricsITest {
         
         ResultSetFuture result = dataAccess.findAllGuageMetrics();
         assertEquals(result.get().all().size(),0,"records have not been deleted"); 
+    }
+    
+    @Test 
+    public void getMetricTags() throws Exception{
+        DateTime start = now().minusMinutes(10);  
+        
+        Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));     
+        
+        List<GaugeData> list = generateTestGuageDESC(1,start);
+        for(GaugeData i : list)
+        {
+            metric.addData(i);            
+        }    
+        
+             
+        getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
+        
+        metric.setDpart(start.getMillis()/timeSpan);
+        
+        getUninterruptibly(dataAccess.addTags(metric, ImmutableMap.of("units", "KB", "env", "test")));
+        
+        ResultSetFuture queryFuture = dataAccess.getMetricTags(metric.getTenantId(), metric.getType(), metric.getId(), metric.getDpart());
+        
+        List<Row> rows = queryFuture.get().all();
+        
+        assertEquals(rows.size(),3,"found more than 3 records in this partition");
+        for(Row i: rows){
+            assertEquals(i.getMap("m_tags", String.class, String.class), ImmutableMap.of("units", "KB", "env", "test"));
+        }
+        
     }
     
     private List<GaugeData> generateTestGaugeASC(int numBuckets, DateTime time){
