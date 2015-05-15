@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" total="19" passed="19">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="16824" started-at="2015-05-13T14:56:41Z" finished-at="2015-05-13T14:56:58Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="16824" started-at="2015-05-13T14:56:41Z" finished-at="2015-05-13T14:56:58Z">
+      <class name="org.hawkular.metrics.core.impl.cassandra.DataAccessITest">
+        <test-method status="PASS" signature="initClass()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initClass" is-config="true" duration-ms="1694" started-at="2015-05-13T15:56:41Z" finished-at="2015-05-13T15:56:43Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initClass -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="912" started-at="2015-05-13T15:56:43Z" finished-at="2015-05-13T15:56:44Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="addMetadataToNumericRawData()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="addMetadataToNumericRawData" duration-ms="400" started-at="2015-05-13T15:56:44Z" finished-at="2015-05-13T15:56:44Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- addMetadataToNumericRawData -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="628" started-at="2015-05-13T15:56:44Z" finished-at="2015-05-13T15:56:45Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="deleteNumericMetrics()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="deleteNumericMetrics" duration-ms="19" started-at="2015-05-13T15:56:45Z" finished-at="2015-05-13T15:56:45Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- deleteNumericMetrics -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="611" started-at="2015-05-13T15:56:45Z" finished-at="2015-05-13T15:56:46Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="doNotAllowDuplicateTenants()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="doNotAllowDuplicateTenants" duration-ms="21" started-at="2015-05-13T15:56:46Z" finished-at="2015-05-13T15:56:46Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- doNotAllowDuplicateTenants -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="688" started-at="2015-05-13T15:56:46Z" finished-at="2015-05-13T15:56:46Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="findCountersByGroup()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="findCountersByGroup" duration-ms="9" started-at="2015-05-13T15:56:46Z" finished-at="2015-05-13T15:56:46Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- findCountersByGroup -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="704" started-at="2015-05-13T15:56:46Z" finished-at="2015-05-13T15:56:47Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="findCountersByGroupAndName()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="findCountersByGroupAndName" duration-ms="14" started-at="2015-05-13T15:56:47Z" finished-at="2015-05-13T15:56:47Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- findCountersByGroupAndName -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="709" started-at="2015-05-13T15:56:47Z" finished-at="2015-05-13T15:56:48Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="findNumericMeytricsWithOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="findNumericMeytricsWithOneBucket" duration-ms="24" started-at="2015-05-13T15:56:48Z" finished-at="2015-05-13T15:56:48Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- findNumericMeytricsWithOneBucket -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="715" started-at="2015-05-13T15:56:48Z" finished-at="2015-05-13T15:56:48Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="findNumericMeytricsWithTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="findNumericMeytricsWithTwoBuckets" duration-ms="26" started-at="2015-05-13T15:56:48Z" finished-at="2015-05-13T15:56:48Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- findNumericMeytricsWithTwoBuckets -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="684" started-at="2015-05-13T15:56:48Z" finished-at="2015-05-13T15:56:49Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindAvailabilities()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindAvailabilities" duration-ms="8" started-at="2015-05-13T15:56:49Z" finished-at="2015-05-13T15:56:49Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindAvailabilities -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="739" started-at="2015-05-13T15:56:49Z" finished-at="2015-05-13T15:56:50Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindAvailabilitiesWithoutWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindAvailabilitiesWithoutWriteTime" duration-ms="8" started-at="2015-05-13T15:56:50Z" finished-at="2015-05-13T15:56:50Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindAvailabilitiesWithoutWriteTime -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="714" started-at="2015-05-13T15:56:50Z" finished-at="2015-05-13T15:56:51Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindNumericRawDataWithOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindNumericRawDataWithOneBucket" duration-ms="5" started-at="2015-05-13T15:56:51Z" finished-at="2015-05-13T15:56:51Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindNumericRawDataWithOneBucket -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="865" started-at="2015-05-13T15:56:51Z" finished-at="2015-05-13T15:56:52Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindNumericRawDataWithThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindNumericRawDataWithThreeBuckets" duration-ms="47" started-at="2015-05-13T15:56:52Z" finished-at="2015-05-13T15:56:52Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindNumericRawDataWithThreeBuckets -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="1114" started-at="2015-05-13T15:56:52Z" finished-at="2015-05-13T15:56:53Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindNumericRawDataWithTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindNumericRawDataWithTwoBuckets" duration-ms="16" started-at="2015-05-13T15:56:53Z" finished-at="2015-05-13T15:56:53Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindNumericRawDataWithTwoBuckets -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="702" started-at="2015-05-13T15:56:53Z" finished-at="2015-05-13T15:56:53Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindNumericdDataDESCThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindNumericdDataDESCThreeBuckets" duration-ms="25" started-at="2015-05-13T15:56:53Z" finished-at="2015-05-13T15:56:53Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindNumericdDataDESCThreeBuckets -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="746" started-at="2015-05-13T15:56:53Z" finished-at="2015-05-13T15:56:54Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindNumericdDataDESCWithOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindNumericdDataDESCWithOneBucket" duration-ms="7" started-at="2015-05-13T15:56:54Z" finished-at="2015-05-13T15:56:54Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindNumericdDataDESCWithOneBucket -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="722" started-at="2015-05-13T15:56:54Z" finished-at="2015-05-13T15:56:55Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindNumericdDataDESCWithTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindNumericdDataDESCWithTwoBuckets" duration-ms="11" started-at="2015-05-13T15:56:55Z" finished-at="2015-05-13T15:56:55Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindNumericdDataDESCWithTwoBuckets -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="679" started-at="2015-05-13T15:56:55Z" finished-at="2015-05-13T15:56:56Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindNumericdRawDataWithATimestamp()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindNumericdRawDataWithATimestamp" duration-ms="7" started-at="2015-05-13T15:56:56Z" finished-at="2015-05-13T15:56:56Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindNumericdRawDataWithATimestamp -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="718" started-at="2015-05-13T15:56:56Z" finished-at="2015-05-13T15:56:56Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="insertAndFindTenant()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="insertAndFindTenant" duration-ms="36" started-at="2015-05-13T15:56:56Z" finished-at="2015-05-13T15:56:56Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- insertAndFindTenant -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="912" started-at="2015-05-13T15:56:56Z" finished-at="2015-05-13T15:56:57Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="updateCounterAndFindCounter()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="updateCounterAndFindCounter" duration-ms="9" started-at="2015-05-13T15:56:57Z" finished-at="2015-05-13T15:56:57Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- updateCounterAndFindCounter -->
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="initMethod" is-config="true" duration-ms="754" started-at="2015-05-13T15:56:57Z" finished-at="2015-05-13T15:56:58Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- initMethod -->
+        <test-method status="PASS" signature="updateCounters()[pri:0, instance:org.hawkular.metrics.core.impl.cassandra.DataAccessITest@51081592]" name="updateCounters" duration-ms="23" started-at="2015-05-13T15:56:58Z" finished-at="2015-05-13T15:56:58Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- updateCounters -->
+      </class> <!-- org.hawkular.metrics.core.impl.cassandra.DataAccessITest -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>

@@ -60,7 +60,7 @@ import org.hawkular.metrics.core.api.TimeUUIDUtils;
  *
  * @author John Sanda
  */
-public class DataAccessImpl implements DataAccess {
+public class DataAccessImpl2 {
 
     private Session session;
 
@@ -140,7 +140,7 @@ public class DataAccessImpl implements DataAccess {
     
     private long timeSpan = 1814400000L;
 
-    public DataAccessImpl(Session session) {
+    public DataAccessImpl2(Session session) {
         this.session = session;
         initPreparedStatements();
     }
@@ -206,17 +206,17 @@ public class DataAccessImpl implements DataAccess {
 
         findNumericDataByDateRangeExclusive = session.prepare(
             "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ?"
+            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?"
                 + " AND time >= ? AND time < ?");
 
         findNumericDataByDateRangeExclusiveASC = session.prepare(
             "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ?"
+            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?"
                 + " AND time >= ? AND time < ? ORDER BY time ASC");
         
        findNumericDataWithWriteTimeByDateRangeExclusive = session.prepare(
             "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ?"
+            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?"
                + " AND time >= ? AND time < ?");
 
         findNumericDataByDateRangeInclusive = session.prepare(
@@ -286,13 +286,13 @@ public class DataAccessImpl implements DataAccess {
 
         findAvailabilities = session.prepare(
             "SELECT time, m_tags, data_retention, availability, tags FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ?"
+            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?"
                 + " AND time >= ? AND time < ? " +
             "ORDER BY time ASC");
 
         findAvailabilitiesWithWriteTime = session.prepare(
             "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ?" 
+            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?" 
                 + " AND time>= ? AND time < ?");
 
         updateRetentionsIndex = session.prepare(
@@ -317,7 +317,7 @@ public class DataAccessImpl implements DataAccess {
             "WHERE tenant_id = ? AND tname = ?");
     }
 
-    @Override
+    
     public ResultSetFuture insertTenant(Tenant tenant) {
         UserType aggregationTemplateType = getKeyspace().getUserType("aggregation_template");
         List<UDTValue> templateValues = new ArrayList<>(tenant.getAggregationTemplates().size());
@@ -345,17 +345,17 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(insertTenant.bind(tenant.getId(), retentions, templateValues));
     }
 
-    @Override
+    
     public ResultSetFuture findAllTenantIds() {
         return session.executeAsync(findAllTenantIds.bind());
     }
 
-    @Override
+    
     public ResultSetFuture findTenant(String id) {
         return session.executeAsync(findTenant.bind(id));
     }
 
-    @Override
+    
     public ResultSetFuture insertMetricInMetricsIndex(Metric<?> metric) {
         return session.executeAsync(insertIntoMetricsIndex.bind(metric.getTenantId(), metric.getType().getCode(),
             metric.getId().getInterval().toString(), metric.getId().getName(), metric.getDataRetention(),
@@ -366,7 +366,7 @@ public class DataAccessImpl implements DataAccess {
         return metric.getTags().entrySet().stream().collect(toMap(Map.Entry::getKey, e -> e.getValue()));
     }
 
-    @Override
+    
     public ResultSetFuture findMetric(String tenantId, MetricType type, MetricId id, long dpart) {
         return session.executeAsync(findMetric.bind(tenantId, type.getCode(), id.getName(),
             id.getInterval().toString(), dpart));
@@ -377,14 +377,14 @@ public class DataAccessImpl implements DataAccess {
     // will store metric tags and data retention in the data table. We would have to
     // determine when we start writing data to a new partition, e.g., the start of the next
     // day, and then add the tags and retention to the new partition.
-    @Override
+    
     public ResultSetFuture addTagsAndDataRetention(Metric metric) {
         return session.executeAsync(addMetadataAndDataRetention.bind(getTags(metric), metric.getDataRetention(),
             metric.getTenantId(), metric.getType().getCode(), metric.getId().getName(),
             metric.getId().getInterval().toString(), metric.getDpart()));
     }
 
-    @Override
+    
     public ResultSetFuture addTags(Metric<?> metric, Map<String, String> tags) {
         BatchStatement batch = new BatchStatement(BatchStatement.Type.UNLOGGED);
         batch.add(addMetricTagsToDataTable.bind(tags, metric.getTenantId(), metric.getType().getCode(),
@@ -394,7 +394,7 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batch);
     }
 
-    @Override
+    
     public ResultSetFuture deleteTags(Metric<?> metric, Set<String> tags) {
         BatchStatement batch = new BatchStatement(BatchStatement.Type.UNLOGGED);
         batch.add(deleteMetricTagsFromDataTable.bind(tags, metric.getTenantId(), metric.getType().getCode(),
@@ -404,7 +404,7 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batch);
     }
 
-    @Override
+    
     public ResultSetFuture updateTagsInMetricsIndex(Metric<?> metric, Map<String, String> additions,
         Set<String> deletions) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED)
@@ -415,7 +415,7 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
+    
     public <T extends Metric<?>> ResultSetFuture updateMetricsIndex(List<T> metrics) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
         for (T metric : metrics) {
@@ -425,12 +425,12 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
+    
     public ResultSetFuture findMetricsInMetricsIndex(String tenantId, MetricType type) {
         return session.executeAsync(readMetricsIndex.bind(tenantId, type.getCode()));
     }
 
-    @Override
+    
     public ResultSetFuture insertData(NumericMetric metric, int ttl) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
         long dpart = hashedDpartOfNumericMetric(metric,timeSpan);
@@ -442,12 +442,12 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-//    @Override
+//    
 //    public ResultSetFuture findData(NumericMetric metric, long startTime, long endTime) {
 //        return findData(metric, startTime, endTime, false);
 //    }
 
-//    @Override
+//    
 //    public ResultSetFuture findData(QueryParams params) {
 //        return session.executeAsync(findNumericDataByDateRangeExclusive.bind(params.getTenantId(),
 //            MetricType.NUMERIC.getCode(), params.getId().getName(), params.getId().getInterval().toString(),
@@ -455,39 +455,47 @@ public class DataAccessImpl implements DataAccess {
 //    }
 
 
-    @Override
-    public ResultSetFuture findData(String tenantId, MetricId id, long startTime, long endTime) {
+    
+    public List<ResultSetFuture> findData(String tenantId, MetricId id, long startTime, long endTime) {
         return findData(tenantId, id, startTime, endTime, false);
     }
 
-    @Override
-    public ResultSetFuture findData(NumericMetric metric, long startTime, long endTime, Order order) {
+    
+    public List<ResultSetFuture> findData(NumericMetric metric, long startTime, long endTime, Order order) {
+        List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
+        for(long dpart:dpartRange(startTime, endTime,timeSpan)){
         if (order == Order.ASC) {
-            return session.executeAsync(findNumericDataByDateRangeExclusiveASC.bind(metric.getTenantId(),
+            result.add(session.executeAsync(findNumericDataByDateRangeExclusiveASC.bind(metric.getTenantId(),
                 MetricType.NUMERIC.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                dpartRange(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
+                dpart, TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE)));
         } else {
-            return session.executeAsync(findNumericDataByDateRangeExclusive.bind(metric.getTenantId(),
+            result.add(session.executeAsync(findNumericDataByDateRangeExclusive.bind(metric.getTenantId(),
                 MetricType.NUMERIC.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                dpartRange(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                dpart, TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
         }
+        }
+        return result;
     }
 
-    @Override
-    public ResultSetFuture findData(String tenantId, MetricId id, long startTime, long endTime,
+    
+    public List<ResultSetFuture> findData(String tenantId, MetricId id, long startTime, long endTime,
             boolean includeWriteTime) {
+       List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
+       for(long dpart:dpartRange(startTime,endTime,timeSpan)){
         if (includeWriteTime) {
-            return session.executeAsync(findNumericDataWithWriteTimeByDateRangeExclusive.bind(tenantId,
-                    MetricType.NUMERIC.getCode(), id.getName(), id.getInterval().toString(), dpartRange(startTime,endTime,timeSpan),
-                    TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+            result.add(session.executeAsync(findNumericDataWithWriteTimeByDateRangeExclusive.bind(tenantId,
+                    MetricType.NUMERIC.getCode(), id.getName(), id.getInterval().toString(), dpart,
+                    TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
         } else {
-            return session.executeAsync(findNumericDataByDateRangeExclusive.bind(tenantId,
-                    MetricType.NUMERIC.getCode(), id.getName(), id.getInterval().toString(), dpartRange(startTime,endTime,timeSpan),
-                    TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+            result.add(session.executeAsync(findNumericDataByDateRangeExclusive.bind(tenantId,
+                    MetricType.NUMERIC.getCode(), id.getName(), id.getInterval().toString(), dpart,
+                    TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
         }
+       }
+       return result;
     }
 
-    @Override
+    
     public ResultSetFuture findData(NumericMetric metric, long timestamp, boolean includeWriteTime) {
         if (includeWriteTime) {
             return session.executeAsync(findNumericDataWithWriteTimeByDateRangeInclusive.bind(metric.getTenantId(),
@@ -500,43 +508,47 @@ public class DataAccessImpl implements DataAccess {
         }
     }
 
-    @Override
-    public ResultSetFuture findData(AvailabilityMetric metric, long startTime, long endTime) {
+    
+    public List<ResultSetFuture> findData(AvailabilityMetric metric, long startTime, long endTime) {
         return findData(metric, startTime, endTime, false);
     }
 
-    @Override
-    public ResultSetFuture findData(AvailabilityMetric metric, long startTime, long endTime, boolean includeWriteTime) {
+    
+    public List<ResultSetFuture> findData(AvailabilityMetric metric, long startTime, long endTime, boolean includeWriteTime) {
+        List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
+        for(long dpart:dpartRange(startTime,endTime,timeSpan)){
         if (includeWriteTime) {
-            return session.executeAsync(findAvailabilitiesWithWriteTime.bind(metric.getTenantId(),
+            result.add( session.executeAsync(findAvailabilitiesWithWriteTime.bind(metric.getTenantId(),
                 MetricType.AVAILABILITY.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                dpartRange(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                dpart, TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
         } else {           
-            return session.executeAsync(findAvailabilities.bind(metric.getTenantId(), MetricType.AVAILABILITY.getCode(),
-                metric.getId().getName(), metric.getId().getInterval().toString(), dpartRange(startTime,endTime,timeSpan),
-                TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
+            result.add(session.executeAsync(findAvailabilities.bind(metric.getTenantId(), MetricType.AVAILABILITY.getCode(),
+                metric.getId().getName(), metric.getId().getInterval().toString(), dpart,
+                TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE)));
         }
+        }
+        return result;
     }
 
-    @Override
+    
     public ResultSetFuture findData(AvailabilityMetric metric, long timestamp) {
         return session.executeAsync(findAvailabilityByDateRangeInclusive.bind(metric.getTenantId(),
             MetricType.AVAILABILITY.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
             timestamp/timeSpan, UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
     }
 
-    @Override
+    
     public ResultSetFuture deleteNumericMetric(String tenantId, String metric, Interval interval, long dpart) {
         return session.executeAsync(deleteNumericMetric.bind(tenantId, MetricType.NUMERIC.getCode(), metric,
             interval.toString(), dpart));
     }
 
-    @Override
+    
     public ResultSetFuture findAllNumericMetrics() {
         return session.executeAsync(findNumericMetrics.bind());
     }
 
-    @Override
+    
     public ResultSetFuture insertNumericTag(String tag, String tagValue, NumericMetric metric,
             List<NumericData> data) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
@@ -548,7 +560,7 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
+    
     public ResultSetFuture insertAvailabilityTag(String tag, String tagValue, AvailabilityMetric metric,
             List<Availability> data) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
@@ -560,24 +572,24 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
+    
     public ResultSetFuture updateDataWithTag(Metric<?> metric, MetricData data, Map<String, String> tags) {
         return session.executeAsync(updateDataWithTags.bind(tags, metric.getTenantId(), metric.getType().getCode(),
                 metric.getId().getName(), metric.getId().getInterval().toString(), data.getTimestamp()/timeSpan,
                 data.getTimeUUID()));
     }
 
-    @Override
+    
     public ResultSetFuture findNumericDataByTag(String tenantId, String tag, String tagValue) {
         return session.executeAsync(findNumericDataByTag.bind(tenantId, tag, tagValue));
     }
 
-    @Override
+    
     public ResultSetFuture findAvailabilityByTag(String tenantId, String tag, String tagValue) {
         return session.executeAsync(findAvailabilityByTag.bind(tenantId, tag, tagValue));
     }
 
-    @Override
+    
     public ResultSetFuture insertData(AvailabilityMetric metric, int ttl) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
         long dpart = hashedDpartOfAvailabilityMetric(metric,timeSpan);
@@ -589,21 +601,25 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
-    public ResultSetFuture findAvailabilityData(String tenantId, MetricId id, long startTime, long endTime) {
-        return session.executeAsync(findAvailabilities.bind(tenantId, MetricType.AVAILABILITY.getCode(),
-            id.getName(), id.getInterval().toString(), dpartRange(startTime, endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime),
-                TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
+    
+    public List<ResultSetFuture> findAvailabilityData(String tenantId, MetricId id, long startTime, long endTime) {
+        List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
+        for(long dpart:dpartRange(startTime,endTime,timeSpan)){
+        result.add(session.executeAsync(findAvailabilities.bind(tenantId, MetricType.AVAILABILITY.getCode(),
+            id.getName(), id.getInterval().toString(), dpart, TimeUUIDUtils.getTimeUUID(startTime),
+                TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE)));
+        }
+        return result;
     }
 
-    @Override
+    
     public ResultSetFuture updateCounter(Counter counter) {
         BoundStatement statement = updateCounter.bind(counter.getValue(), counter.getTenantId(), counter.getGroup(),
             counter.getName());
         return session.executeAsync(statement);
     }
 
-    @Override
+    
     public ResultSetFuture updateCounters(Collection<Counter> counters) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.COUNTER);
         for (Counter counter : counters) {
@@ -613,12 +629,12 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
+    
     public ResultSetFuture findDataRetentions(String tenantId, MetricType type) {
         return session.executeAsync(findDataRetentions.bind(tenantId, type.getCode()));
     }
 
-    @Override
+    
     public ResultSetFuture updateRetentionsIndex(String tenantId, MetricType type, Set<Retention> retentions) {
         BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
         for (Retention r : retentions) {
@@ -628,13 +644,13 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
+    
     public ResultSetFuture insertIntoMetricsTagsIndex(Metric<?> metric, Map<String, String> tags) {
         return executeTagsBatch(tags, (name, value) -> insertMetricsTagsIndex.bind(metric.getTenantId(), name, value,
             metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString()));
     }
 
-    @Override
+    
     public ResultSetFuture deleteFromMetricsTagsIndex(Metric<?> metric, Map<String, String> tags) {
         return executeTagsBatch(tags, (name, value) -> deleteMetricsTagsIndex.bind(metric.getTenantId(), name, value,
             metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString()));
@@ -647,12 +663,12 @@ public class DataAccessImpl implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
+    
     public ResultSetFuture findMetricsByTag(String tenantId, String tag) {
         return session.executeAsync(findMetricsByTagName.bind(tenantId, tag));
     }
 
-    @Override
+    
     public ResultSetFuture updateRetentionsIndex(Metric<?> metric) {
         return session.executeAsync(updateRetentionsIndex.bind(metric.getTenantId(), metric.getType().getCode(),
             metric.getId().getInterval().toString(), metric.getId().getName(), metric.getDataRetention()));

@@ -74,29 +74,27 @@ public interface MetricsService {
 
     ListenableFuture<List<Metric<?>>> findMetrics(String tenantId, MetricType type);
 
-    ListenableFuture<Map<String, String>> getMetricTags(String tenantId, MetricType type, MetricId id);
-
     ListenableFuture<Void> addTags(Metric metric, Map<String, String> tags);
 
     ListenableFuture<Void> deleteTags(Metric metric, Map<String, String> tags);
 
-    ListenableFuture<Void> addGaugeData(List<Gauge> metrics);
+    ListenableFuture<Void> addNumericData(List<NumericMetric> metrics);
 
-    ListenableFuture<List<GaugeData>> findGaugeData(String tenantId, MetricId id, Long start, Long end);
+    ListenableFuture<List<NumericData>> findNumericData(String tenantId, MetricId id, Long start, Long end);
 
-    ListenableFuture<BucketedOutput<GaugeBucketDataPoint>> findGaugeStats(
-            Gauge metric, long start, long end, Buckets buckets
+    ListenableFuture<BucketedOutput<NumericBucketDataPoint>> findNumericStats(
+            NumericMetric metric, long start, long end, Buckets buckets
     );
 
-    ListenableFuture<Void> addAvailabilityData(List<Availability> metrics);
+    ListenableFuture<Void> addAvailabilityData(List<AvailabilityMetric> metrics);
 
-    ListenableFuture<List<AvailabilityData>> findAvailabilityData(String tenantId, MetricId id, long start, long end);
+    ListenableFuture<List<Availability>> findAvailabilityData(String tenantId, MetricId id, long start, long end);
 
-    ListenableFuture<List<AvailabilityData>> findAvailabilityData(String tenantId, MetricId id, long start, long end,
+    ListenableFuture<List<Availability>> findAvailabilityData(String tenantId, MetricId id, long start, long end,
             boolean distinct);
 
     ListenableFuture<BucketedOutput<AvailabilityBucketDataPoint>> findAvailabilityStats(
-            Availability metric, long start, long end, Buckets buckets
+            AvailabilityMetric metric, long start, long end, Buckets buckets
     );
 
     ListenableFuture<Void> updateCounter(Counter counter);
@@ -110,21 +108,21 @@ public interface MetricsService {
     /** Check if a metric with the passed {id} has been stored in the system */
     ListenableFuture<Boolean> idExists(String id);
 
-    ListenableFuture<List<GaugeData>> tagGaugeData(Gauge metric, Map<String, String> tags,
+    ListenableFuture<List<NumericData>> tagNumericData(NumericMetric metric, Map<String, String> tags,
         long start, long end);
 
-    ListenableFuture<List<AvailabilityData>> tagAvailabilityData(Availability metric, Map<String, String> tags,
+    ListenableFuture<List<Availability>> tagAvailabilityData(AvailabilityMetric metric, Map<String, String> tags,
             long start, long end);
 
-    ListenableFuture<List<GaugeData>> tagGaugeData(Gauge metric, Map<String, String> tags,
+    ListenableFuture<List<NumericData>> tagNumericData(NumericMetric metric, Map<String, String> tags,
         long timestamp);
 
-    ListenableFuture<List<AvailabilityData>> tagAvailabilityData(Availability metric, Map<String, String> tags,
+    ListenableFuture<List<Availability>> tagAvailabilityData(AvailabilityMetric metric, Map<String, String> tags,
             long timestamp);
 
-    ListenableFuture<Map<MetricId, Set<GaugeData>>> findGaugeDataByTags(String tenantId, Map<String, String> tags);
+    ListenableFuture<Map<MetricId, Set<NumericData>>> findNumericDataByTags(String tenantId, Map<String, String> tags);
 
-    ListenableFuture<Map<MetricId, Set<AvailabilityData>>> findAvailabilityByTags(String tenantId,
+    ListenableFuture<Map<MetricId, Set<Availability>>> findAvailabilityByTags(String tenantId,
             Map<String, String> tags);
 
     /**

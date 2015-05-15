@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Failed suite [Default suite]">
+  <test name="Default test(failed)">
+    <classes>
+      <class name="org.hawkular.metrics.core.impl.cassandra.DataAccessITest">
+        <methods>
+          <include name="doNotAllowDuplicateTenants"/>
+          <include name="insertAndFindNumericRawDataWithOneBucket"/>
+          <include name="insertAndFindNumericdRawDataWithATimestamp"/>
+          <include name="insertAndFindNumericdDataDESCWithTwoBuckets"/>
+          <include name="updateCounters"/>
+          <include name="deleteNumericMetrics"/>
+          <include name="insertAndFindNumericdDataDESCWithOneBucket"/>
+          <include name="findCountersByGroup"/>
+          <include name="insertAndFindNumericRawDataWithTwoBuckets"/>
+          <include name="insertAndFindAvailabilities"/>
+          <include name="updateCounterAndFindCounter"/>
+          <include name="insertAndFindTenant"/>
+          <include name="addMetadataToNumericRawData"/>
+          <include name="initClass"/>
+          <include name="insertAndFindNumericdDataDESCThreeBuckets"/>
+          <include name="findCountersByGroupAndName"/>
+          <include name="insertAndFindAvailabilitiesWithoutWriteTime"/>
+          <include name="insertAndFindNumericRawDataWithThreeBuckets"/>
+          <include name="findNumericMeytricsWithTwoBuckets"/>
+          <include name="findNumericMeytricsWithOneBucket"/>
+        </methods>
+      </class> <!-- org.hawkular.metrics.core.impl.cassandra.DataAccessITest -->
+    </classes>
+  </test> <!-- Default test(failed) -->
+</suite> <!-- Failed suite [Default suite] -->

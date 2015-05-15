@@ -21,20 +21,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.RandomAccess;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.hawkular.metrics.core.api.BucketedOutput;
 import org.hawkular.metrics.core.api.Buckets;
 import org.hawkular.metrics.core.api.MetricData;
 import org.hawkular.metrics.core.api.MetricId;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-
 /**
  * Transform a {@link org.hawkular.metrics.core.api.Metric} with its {@link org.hawkular.metrics.core.api.MetricData}
  * into a {@link org.hawkular.metrics.core.api.BucketedOutput}.
  *
- * @param <DATA>   type of metric data, like {@link org.hawkular.metrics.core.api.GaugeData}
- * @param <POINT>  type of bucket points, like {@link org.hawkular.metrics.core.api.GaugeBucketDataPoint}
+ * @param <DATA>   type of metric data, like {@link org.hawkular.metrics.core.api.NumericData}
+ * @param <POINT>  type of bucket points, like {@link org.hawkular.metrics.core.api.NumericBucketDataPoint}
  *
  * @author Thomas Segismont
  */
@@ -48,8 +47,8 @@ public abstract class BucketedOutputMapper<DATA extends MetricData, POINT>
     private MetricId id;
 
     /**
-     * Availability queries have been refactored to return data is ascending order,
-     * but some gauge data queries return data in descending order.
+     * Availability queries have been refactored to return data is ascending order, but some numeric data queries
+     * return data in descending order.
      */
     private boolean isDescending;
 

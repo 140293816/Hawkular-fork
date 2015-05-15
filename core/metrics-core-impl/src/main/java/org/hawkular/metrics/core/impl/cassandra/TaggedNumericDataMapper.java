@@ -23,8 +23,8 @@ import java.util.Set;
 
 import org.hawkular.metrics.core.api.Interval;
 import org.hawkular.metrics.core.api.MetricId;
-import org.hawkular.metrics.core.api.GaugeData;
-import org.hawkular.metrics.core.api.Gauge;
+import org.hawkular.metrics.core.api.NumericData;
+import org.hawkular.metrics.core.api.NumericMetric;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
@@ -33,26 +33,26 @@ import com.google.common.base.Function;
 /**
  * @author John Sanda
  */
-public class TaggedGaugeDataMapper implements Function<ResultSet, Map<MetricId, Set<GaugeData>>> {
+public class TaggedNumericDataMapper implements Function<ResultSet, Map<MetricId, Set<NumericData>>> {
 
     @Override
-    public Map<MetricId, Set<GaugeData>> apply(ResultSet resultSet) {
-        Map<MetricId, Set<GaugeData>> taggedData = new HashMap<>();
-        Gauge metric = null;
-        LinkedHashSet<GaugeData> set = new LinkedHashSet<>();
+    public Map<MetricId, Set<NumericData>> apply(ResultSet resultSet) {
+        Map<MetricId, Set<NumericData>> taggedData = new HashMap<>();
+        NumericMetric metric = null;
+        LinkedHashSet<NumericData> set = new LinkedHashSet<>();
         for (Row row : resultSet) {
             if (metric == null) {
                 metric = createMetric(row);
-                set.add(createGaugeData(row));
+                set.add(createNumericData(row));
             } else {
-                Gauge nextMetric = createMetric(row);
+                NumericMetric nextMetric = createMetric(row);
                 if (metric.equals(nextMetric)) {
-                    set.add(createGaugeData(row));
+                    set.add(createNumericData(row));
                 } else {
                     taggedData.put(metric.getId(), set);
                     metric = nextMetric;
                     set = new LinkedHashSet<>();
-                    set.add(createGaugeData(row));
+                    set.add(createNumericData(row));
                 }
             }
         }
@@ -62,12 +62,12 @@ public class TaggedGaugeDataMapper implements Function<ResultSet, Map<MetricId, 
         return taggedData;
     }
 
-    private Gauge createMetric(Row row) {
-        return new Gauge(row.getString(0), new MetricId(row.getString(4), Interval.parse(row.getString(5))));
+    private NumericMetric createMetric(Row row) {
+        return new NumericMetric(row.getString(0), new MetricId(row.getString(4), Interval.parse(row.getString(5))));
     }
 
-    private GaugeData createGaugeData(Row row) {
-        return new GaugeData(row.getUUID(6), row.getDouble(7));
+    private NumericData createNumericData(Row row) {
+        return new NumericData(row.getUUID(6), row.getDouble(7));
     }
 
 }

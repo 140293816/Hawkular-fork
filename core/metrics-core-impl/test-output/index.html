@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+  <title>TestNG reports</title>
+
+    <link type="text/css" href="testng-reports.css" rel="stylesheet" />  
+    <script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="testng-reports.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type='text/javascript'>
+      google.load('visualization', '1', {packages:['table']});
+      google.setOnLoadCallback(drawTable);
+      var suiteTableInitFunctions = new Array();
+      var suiteTableData = new Array();
+    </script>
+    <!--
+      <script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.16.custom.min.js"></script>
+     -->
+  </head>
+
+  <body>
+    <div class="top-banner-root">
+      <span class="top-banner-title-font">Test results</span>
+      <br/>
+      <span class="top-banner-font-1">1 suite</span>
+    </div> <!-- top-banner-root -->
+    <div class="navigator-root">
+      <div class="navigator-suite-header">
+        <span>All suites</span>
+        <a href="#" class="collapse-all-link" title="Collapse/expand all the suites">
+          <img class="collapse-all-icon" src="collapseall.gif">
+          </img> <!-- collapse-all-icon -->
+        </a> <!-- collapse-all-link -->
+      </div> <!-- navigator-suite-header -->
+      <div class="suite">
+        <div class="rounded-window">
+          <div class="suite-header light-rounded-window-top">
+            <a href="#" class="navigator-link" panel-name="suite-Default_suite">
+              <span class="suite-name border-passed">Default suite</span>
+            </a> <!-- navigator-link -->
+          </div> <!-- suite-header light-rounded-window-top -->
+          <div class="navigator-suite-content">
+            <div class="suite-section-title">
+              <span>Info</span>
+            </div> <!-- suite-section-title -->
+            <div class="suite-section-content">
+              <ul>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="test-xml-Default_suite">
+                    <span>testng-customsuite.xml</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="testlist-Default_suite">
+                    <span class="test-stats">1 test</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="group-Default_suite">
+                    <span>0 groups</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="times-Default_suite">
+                    <span>Times</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="reporter-Default_suite">
+                    <span>Reporter output</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="ignored-methods-Default_suite">
+                    <span>Ignored methods</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+                <li>
+                  <a href="#" class="navigator-link " panel-name="chronological-Default_suite">
+                    <span>Chronological view</span>
+                  </a> <!-- navigator-link  -->
+                </li>
+              </ul>
+            </div> <!-- suite-section-content -->
+            <div class="result-section">
+              <div class="suite-section-title">
+                <span>Results</span>
+              </div> <!-- suite-section-title -->
+              <div class="suite-section-content">
+                <ul>
+                  <li>
+                    <span class="method-stats">19 methods,   19 passed</span>
+                  </li>
+                  <li>
+                    <span class="method-list-title passed">Passed methods</span>
+                    <span class="show-or-hide-methods passed">
+                      <a href="#" panel-name="suite-Default_suite" class="hide-methods passed suite-Default_suite"> (hide)</a> <!-- hide-methods passed suite-Default_suite -->
+                      <a href="#" panel-name="suite-Default_suite" class="show-methods passed suite-Default_suite"> (show)</a> <!-- show-methods passed suite-Default_suite -->
+                    </span>
+                    <div class="method-list-content passed suite-Default_suite">
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="addMetadataToNumericRawData">addMetadataToNumericRawData</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="deleteNumericMetrics">deleteNumericMetrics</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="doNotAllowDuplicateTenants">doNotAllowDuplicateTenants</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="findCountersByGroup">findCountersByGroup</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="findCountersByGroupAndName">findCountersByGroupAndName</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="findNumericMeytricsWithOneBucket">findNumericMeytricsWithOneBucket</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="findNumericMeytricsWithTwoBuckets">findNumericMeytricsWithTwoBuckets</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindAvailabilities">insertAndFindAvailabilities</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindAvailabilitiesWithoutWriteTime">insertAndFindAvailabilitiesWithoutWriteTime</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindNumericRawDataWithOneBucket">insertAndFindNumericRawDataWithOneBucket</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindNumericRawDataWithThreeBuckets">insertAndFindNumericRawDataWithThreeBuckets</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindNumericRawDataWithTwoBuckets">insertAndFindNumericRawDataWithTwoBuckets</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindNumericdDataDESCThreeBuckets">insertAndFindNumericdDataDESCThreeBuckets</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindNumericdDataDESCWithOneBucket">insertAndFindNumericdDataDESCWithOneBucket</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindNumericdDataDESCWithTwoBuckets">insertAndFindNumericdDataDESCWithTwoBuckets</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindNumericdRawDataWithATimestamp">insertAndFindNumericdRawDataWithATimestamp</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="insertAndFindTenant">insertAndFindTenant</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="updateCounterAndFindCounter">updateCounterAndFindCounter</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                      <span>
+                        <img width="3%" src="passed.png"/>
+                        <a href="#" class="method navigator-link" panel-name="suite-Default_suite" title="org.hawkular.metrics.core.impl.cassandra.DataAccessITest" hash-for-method="updateCounters">updateCounters</a> <!-- method navigator-link -->
+                      </span>
+                      <br/>
+                    </div> <!-- method-list-content passed suite-Default_suite -->
+                  </li>
+                </ul>
+              </div> <!-- suite-section-content -->
+            </div> <!-- result-section -->
+          </div> <!-- navigator-suite-content -->
+        </div> <!-- rounded-window -->
+      </div> <!-- suite -->
+    </div> <!-- navigator-root -->
+    <div class="wrapper">
+      <div class="main-panel-root">
+        <div panel-name="suite-Default_suite" class="panel Default_suite">
+          <div class="suite-Default_suite-class-passed">
+            <div class="main-panel-header rounded-window-top">
+              <img src="passed.png"/>
+              <span class="class-name">org.hawkular.metrics.core.impl.cassandra.DataAccessITest</span>
+            </div> <!-- main-panel-header rounded-window-top -->
+            <div class="main-panel-content rounded-window-bottom">
+              <div class="method">
+                <div class="method-content">
+                  <a name="addMetadataToNumericRawData">
+                  </a> <!-- addMetadataToNumericRawData -->
+                  <span class="method-name">addMetadataToNumericRawData</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="deleteNumericMetrics">
+                  </a> <!-- deleteNumericMetrics -->
+                  <span class="method-name">deleteNumericMetrics</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="doNotAllowDuplicateTenants">
+                  </a> <!-- doNotAllowDuplicateTenants -->
+                  <span class="method-name">doNotAllowDuplicateTenants</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="findCountersByGroup">
+                  </a> <!-- findCountersByGroup -->
+                  <span class="method-name">findCountersByGroup</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="findCountersByGroupAndName">
+                  </a> <!-- findCountersByGroupAndName -->
+                  <span class="method-name">findCountersByGroupAndName</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="findNumericMeytricsWithOneBucket">
+                  </a> <!-- findNumericMeytricsWithOneBucket -->
+                  <span class="method-name">findNumericMeytricsWithOneBucket</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="findNumericMeytricsWithTwoBuckets">
+                  </a> <!-- findNumericMeytricsWithTwoBuckets -->
+                  <span class="method-name">findNumericMeytricsWithTwoBuckets</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindAvailabilities">
+                  </a> <!-- insertAndFindAvailabilities -->
+                  <span class="method-name">insertAndFindAvailabilities</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindAvailabilitiesWithoutWriteTime">
+                  </a> <!-- insertAndFindAvailabilitiesWithoutWriteTime -->
+                  <span class="method-name">insertAndFindAvailabilitiesWithoutWriteTime</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindNumericRawDataWithOneBucket">
+                  </a> <!-- insertAndFindNumericRawDataWithOneBucket -->
+                  <span class="method-name">insertAndFindNumericRawDataWithOneBucket</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindNumericRawDataWithThreeBuckets">
+                  </a> <!-- insertAndFindNumericRawDataWithThreeBuckets -->
+                  <span class="method-name">insertAndFindNumericRawDataWithThreeBuckets</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindNumericRawDataWithTwoBuckets">
+                  </a> <!-- insertAndFindNumericRawDataWithTwoBuckets -->
+                  <span class="method-name">insertAndFindNumericRawDataWithTwoBuckets</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindNumericdDataDESCThreeBuckets">
+                  </a> <!-- insertAndFindNumericdDataDESCThreeBuckets -->
+                  <span class="method-name">insertAndFindNumericdDataDESCThreeBuckets</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindNumericdDataDESCWithOneBucket">
+                  </a> <!-- insertAndFindNumericdDataDESCWithOneBucket -->
+                  <span class="method-name">insertAndFindNumericdDataDESCWithOneBucket</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindNumericdDataDESCWithTwoBuckets">
+                  </a> <!-- insertAndFindNumericdDataDESCWithTwoBuckets -->
+                  <span class="method-name">insertAndFindNumericdDataDESCWithTwoBuckets</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindNumericdRawDataWithATimestamp">
+                  </a> <!-- insertAndFindNumericdRawDataWithATimestamp -->
+                  <span class="method-name">insertAndFindNumericdRawDataWithATimestamp</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="insertAndFindTenant">
+                  </a> <!-- insertAndFindTenant -->
+                  <span class="method-name">insertAndFindTenant</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="updateCounterAndFindCounter">
+                  </a> <!-- updateCounterAndFindCounter -->
+                  <span class="method-name">updateCounterAndFindCounter</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+              <div class="method">
+                <div class="method-content">
+                  <a name="updateCounters">
+                  </a> <!-- updateCounters -->
+                  <span class="method-name">updateCounters</span>
+                </div> <!-- method-content -->
+              </div> <!-- method -->
+            </div> <!-- main-panel-content rounded-window-bottom -->
+          </div> <!-- suite-Default_suite-class-passed -->
+        </div> <!-- panel Default_suite -->
+        <div panel-name="test-xml-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">/tmp/testng-eclipse-653936297/testng-customsuite.xml</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE suite SYSTEM &quot;http://testng.org/testng-1.0.dtd&quot;&gt;
+&lt;suite name=&quot;Default suite&quot;&gt;
+  &lt;test verbose=&quot;2&quot; name=&quot;Default test&quot;&gt;
+    &lt;classes&gt;
+      &lt;class name=&quot;org.hawkular.metrics.core.impl.cassandra.DataAccessITest&quot;/&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt; &lt;!-- Default test --&gt;
+&lt;/suite&gt; &lt;!-- Default suite --&gt;
+            </pre>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="testlist-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Tests for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <ul>
+              <li>
+                <span class="test-name">Default test (1 class)</span>
+              </li>
+            </ul>
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="group-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Groups for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="times-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Times for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="times-div">
+              <script type="text/javascript">
+suiteTableInitFunctions.push('tableData_Default_suite');
+function tableData_Default_suite() {
+var data = new google.visualization.DataTable();
+data.addColumn('number', 'Number');
+data.addColumn('string', 'Method');
+data.addColumn('string', 'Class');
+data.addColumn('number', 'Time (ms)');
+data.addRows(19);
+data.setCell(0, 0, 0)
+data.setCell(0, 1, 'addMetadataToNumericRawData')
+data.setCell(0, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(0, 3, 400);
+data.setCell(1, 0, 1)
+data.setCell(1, 1, 'insertAndFindNumericRawDataWithThreeBuckets')
+data.setCell(1, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(1, 3, 47);
+data.setCell(2, 0, 2)
+data.setCell(2, 1, 'insertAndFindTenant')
+data.setCell(2, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(2, 3, 36);
+data.setCell(3, 0, 3)
+data.setCell(3, 1, 'findNumericMeytricsWithTwoBuckets')
+data.setCell(3, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(3, 3, 26);
+data.setCell(4, 0, 4)
+data.setCell(4, 1, 'insertAndFindNumericdDataDESCThreeBuckets')
+data.setCell(4, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(4, 3, 25);
+data.setCell(5, 0, 5)
+data.setCell(5, 1, 'findNumericMeytricsWithOneBucket')
+data.setCell(5, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(5, 3, 24);
+data.setCell(6, 0, 6)
+data.setCell(6, 1, 'updateCounters')
+data.setCell(6, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(6, 3, 23);
+data.setCell(7, 0, 7)
+data.setCell(7, 1, 'doNotAllowDuplicateTenants')
+data.setCell(7, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(7, 3, 21);
+data.setCell(8, 0, 8)
+data.setCell(8, 1, 'deleteNumericMetrics')
+data.setCell(8, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(8, 3, 19);
+data.setCell(9, 0, 9)
+data.setCell(9, 1, 'insertAndFindNumericRawDataWithTwoBuckets')
+data.setCell(9, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(9, 3, 16);
+data.setCell(10, 0, 10)
+data.setCell(10, 1, 'findCountersByGroupAndName')
+data.setCell(10, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(10, 3, 14);
+data.setCell(11, 0, 11)
+data.setCell(11, 1, 'insertAndFindNumericdDataDESCWithTwoBuckets')
+data.setCell(11, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(11, 3, 11);
+data.setCell(12, 0, 12)
+data.setCell(12, 1, 'findCountersByGroup')
+data.setCell(12, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(12, 3, 9);
+data.setCell(13, 0, 13)
+data.setCell(13, 1, 'updateCounterAndFindCounter')
+data.setCell(13, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(13, 3, 9);
+data.setCell(14, 0, 14)
+data.setCell(14, 1, 'insertAndFindAvailabilities')
+data.setCell(14, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(14, 3, 8);
+data.setCell(15, 0, 15)
+data.setCell(15, 1, 'insertAndFindAvailabilitiesWithoutWriteTime')
+data.setCell(15, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(15, 3, 8);
+data.setCell(16, 0, 16)
+data.setCell(16, 1, 'insertAndFindNumericdDataDESCWithOneBucket')
+data.setCell(16, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(16, 3, 7);
+data.setCell(17, 0, 17)
+data.setCell(17, 1, 'insertAndFindNumericdRawDataWithATimestamp')
+data.setCell(17, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(17, 3, 7);
+data.setCell(18, 0, 18)
+data.setCell(18, 1, 'insertAndFindNumericRawDataWithOneBucket')
+data.setCell(18, 2, 'org.hawkular.metrics.core.impl.cassandra.DataAccessITest')
+data.setCell(18, 3, 5);
+window.suiteTableData['Default_suite']= { tableData: data, tableDiv: 'times-div-Default_suite'}
+return data;
+}
+              </script>
+              <span class="suite-total-time">Total running time: 715 ms</span>
+              <div id="times-div-Default_suite">
+              </div> <!-- times-div-Default_suite -->
+            </div> <!-- times-div -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="reporter-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Reporter output for Default suite</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="ignored-methods-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">0 ignored methods</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+        <div panel-name="chronological-Default_suite" class="panel">
+          <div class="main-panel-header rounded-window-top">
+            <span class="header-content">Methods in chronological order</span>
+          </div> <!-- main-panel-header rounded-window-top -->
+          <div class="main-panel-content rounded-window-bottom">
+            <div class="chronological-class">
+              <div class="chronological-class-name">org.hawkular.metrics.core.impl.cassandra.DataAccessITest</div> <!-- chronological-class-name -->
+              <div class="configuration-class before">
+                <span class="method-name">initClass</span>
+                <span class="method-start">0 ms</span>
+              </div> <!-- configuration-class before -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">1702 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">addMetadataToNumericRawData</span>
+                <span class="method-start">2614 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">3017 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">deleteNumericMetrics</span>
+                <span class="method-start">3645 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">3665 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">doNotAllowDuplicateTenants</span>
+                <span class="method-start">4276 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">4298 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">findCountersByGroup</span>
+                <span class="method-start">4986 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">4997 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">findCountersByGroupAndName</span>
+                <span class="method-start">5701 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">5717 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">findNumericMeytricsWithOneBucket</span>
+                <span class="method-start">6426 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">6451 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">findNumericMeytricsWithTwoBuckets</span>
+                <span class="method-start">7166 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">7193 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindAvailabilities</span>
+                <span class="method-start">7877 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">7886 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindAvailabilitiesWithoutWriteTime</span>
+                <span class="method-start">8625 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">8634 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindNumericRawDataWithOneBucket</span>
+                <span class="method-start">9348 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">9354 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindNumericRawDataWithThreeBuckets</span>
+                <span class="method-start">10219 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">10268 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindNumericRawDataWithTwoBuckets</span>
+                <span class="method-start">11382 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">11399 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindNumericdDataDESCThreeBuckets</span>
+                <span class="method-start">12101 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">12128 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindNumericdDataDESCWithOneBucket</span>
+                <span class="method-start">12874 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">12882 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindNumericdDataDESCWithTwoBuckets</span>
+                <span class="method-start">13604 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">13616 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindNumericdRawDataWithATimestamp</span>
+                <span class="method-start">14295 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">14303 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">insertAndFindTenant</span>
+                <span class="method-start">15021 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">15058 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">updateCounterAndFindCounter</span>
+                <span class="method-start">15970 ms</span>
+              </div> <!-- test-method -->
+              <div class="configuration-method before">
+                <span class="method-name">initMethod</span>
+                <span class="method-start">15981 ms</span>
+              </div> <!-- configuration-method before -->
+              <div class="test-method">
+                <span class="method-name">updateCounters</span>
+                <span class="method-start">16735 ms</span>
+              </div> <!-- test-method -->
+          </div> <!-- main-panel-content rounded-window-bottom -->
+        </div> <!-- panel -->
+      </div> <!-- main-panel-root -->
+    </div> <!-- wrapper -->
+  </body>
+</html>
