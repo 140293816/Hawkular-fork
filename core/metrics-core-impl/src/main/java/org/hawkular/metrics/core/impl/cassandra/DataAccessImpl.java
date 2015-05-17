@@ -464,11 +464,11 @@ public class DataAccessImpl implements DataAccess {
         if (order == Order.ASC) {
             return session.executeAsync(findGaugeDataByDateRangeExclusiveASC.bind(metric.getTenantId(),
                 MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                dpartRange(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
+                dpartRangeASC(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
         } else {
             return session.executeAsync(findGaugeDataByDateRangeExclusive.bind(metric.getTenantId(),
                 MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                dpartRange(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                dpartRangeDESC(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
         }
     }
 
@@ -477,11 +477,11 @@ public class DataAccessImpl implements DataAccess {
             boolean includeWriteTime) {
         if (includeWriteTime) {
             return session.executeAsync(findGaugeDataWithWriteTimeByDateRangeExclusive.bind(tenantId,
-                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), dpartRange(startTime,endTime,timeSpan),
+                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), dpartRangeDESC(startTime,endTime,timeSpan),
                     TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
         } else {
             return session.executeAsync(findGaugeDataByDateRangeExclusive.bind(tenantId,
-                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), dpartRange(startTime,endTime,timeSpan),
+                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), dpartRangeDESC(startTime,endTime,timeSpan),
                     TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
         }
     }
@@ -509,10 +509,10 @@ public class DataAccessImpl implements DataAccess {
         if (includeWriteTime) {
             return session.executeAsync(findAvailabilitiesWithWriteTime.bind(metric.getTenantId(),
                 MetricType.AVAILABILITY.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                dpartRange(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                dpartRangeDESC(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
         } else {
             return session.executeAsync(findAvailabilities.bind(metric.getTenantId(), MetricType.AVAILABILITY.getCode(),
-                metric.getId().getName(), metric.getId().getInterval().toString(), dpartRange(startTime,endTime,timeSpan),
+                metric.getId().getName(), metric.getId().getInterval().toString(), dpartRangeASC(startTime,endTime,timeSpan),
                 TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
         }
     }
@@ -590,7 +590,7 @@ public class DataAccessImpl implements DataAccess {
     @Override
     public ResultSetFuture findAvailabilityData(String tenantId, MetricId id, long startTime, long endTime) {
         return session.executeAsync(findAvailabilities.bind(tenantId, MetricType.AVAILABILITY.getCode(),
-            id.getName(), id.getInterval().toString(), dpartRange(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime),
+            id.getName(), id.getInterval().toString(), dpartRangeASC(startTime,endTime,timeSpan), TimeUUIDUtils.getTimeUUID(startTime),
                 TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
     }
 
@@ -674,9 +674,17 @@ public class DataAccessImpl implements DataAccess {
         return time/timeSpan;
     }
     
-    private List<Long> dpartRange (long startTime, long endTime, long timeSpan){
+    private List<Long> dpartRangeDESC (long startTime, long endTime, long timeSpan){
         ArrayList<Long> range = new ArrayList<Long>();
         for(long i = endTime/timeSpan;i>=startTime/timeSpan;i--){
+            range.add(i);
+        }
+        return range;
+    }
+    
+    private List<Long> dpartRangeASC (long startTime, long endTime, long timeSpan){
+        ArrayList<Long> range = new ArrayList<Long>();
+        for(long i = startTime/timeSpan;i<=endTime/timeSpan;i++){
             range.add(i);
         }
         return range;

@@ -448,17 +448,21 @@ public class DataAccessImpl2 {
     
     public List<ResultSetFuture> findData(Gauge metric, long startTime, long endTime, Order order) {
         List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
-        for(long dpart: dpartRange(startTime,endTime,timeSpan)){
+        
         if (order == Order.ASC) {
+            for(long dpart: dpartRangeASC(startTime,endTime,timeSpan)){
             result.add(session.executeAsync(findGaugeDataByDateRangeExclusiveASC.bind(metric.getTenantId(),
                 MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
                 dpart, TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
+            }
         } else {
+            for(long dpart: dpartRangeDESC(startTime,endTime,timeSpan)){
             result.add(session.executeAsync(findGaugeDataByDateRangeExclusive.bind(metric.getTenantId(),
                 MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
                 dpart, TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
+            }
         }
-        }
+        
         return result;
     }
 
@@ -466,17 +470,21 @@ public class DataAccessImpl2 {
     public List<ResultSetFuture> findData(String tenantId, MetricId id, long startTime, long endTime,
             boolean includeWriteTime) {
         List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
-        for(long dpart : dpartRange(startTime,endTime,timeSpan)){
+        
         if (includeWriteTime) {
+            for(long dpart: dpartRangeDESC(startTime,endTime,timeSpan)){
             result.add(session.executeAsync(findGaugeDataWithWriteTimeByDateRangeExclusive.bind(tenantId,
                     MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), dpart,
                     TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
+            }
         } else {
+            for(long dpart: dpartRangeDESC(startTime,endTime,timeSpan)){
             result.add(session.executeAsync(findGaugeDataByDateRangeExclusive.bind(tenantId,
                     MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), dpart,
                     TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
+            }
         }
-        }
+        
         return result;
     }
 
@@ -501,12 +509,15 @@ public class DataAccessImpl2 {
     
     public List<ResultSetFuture> findData(Availability metric, long startTime, long endTime, boolean includeWriteTime) {
         List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
-        for(long dpart : dpartRange(startTime,endTime,timeSpan)){
+       
         if (includeWriteTime) {
+            for(long dpart: dpartRangeDESC(startTime,endTime,timeSpan)){
             result.add(session.executeAsync(findAvailabilitiesWithWriteTime.bind(metric.getTenantId(),
                 MetricType.AVAILABILITY.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
                 dpart, TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
+            }
         } else {
+            for(long dpart: dpartRangeASC(startTime,endTime,timeSpan)){
             result.add(session.executeAsync(findAvailabilities.bind(metric.getTenantId(), MetricType.AVAILABILITY.getCode(),
                 metric.getId().getName(), metric.getId().getInterval().toString(), dpart,
                 TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime))));
@@ -588,7 +599,7 @@ public class DataAccessImpl2 {
     
     public List<ResultSetFuture> findAvailabilityData(String tenantId, MetricId id, long startTime, long endTime) {
         List<ResultSetFuture> result = new ArrayList<ResultSetFuture>();
-        for(long dpart : dpartRange(startTime,endTime,timeSpan)){
+        for(long dpart : dpartRangeASC(startTime,endTime,timeSpan)){
         result.add(session.executeAsync(findAvailabilities.bind(tenantId, MetricType.AVAILABILITY.getCode(),
             id.getName(), id.getInterval().toString(), dpart, TimeUUIDUtils.getTimeUUID(startTime),
                 TimeUUIDUtils.getTimeUUID(endTime))));
@@ -676,12 +687,21 @@ public class DataAccessImpl2 {
         return time/timeSpan;
     }
     
-    private List<Long> dpartRange (long startTime, long endTime, long timeSpan){
+    private List<Long> dpartRangeDESC (long startTime, long endTime, long timeSpan){
         ArrayList<Long> range = new ArrayList<Long>();
         for(long i = endTime/timeSpan;i>=startTime/timeSpan;i--){
             range.add(i);
         }
         return range;
     }
+    
+    private List<Long> dpartRangeASC (long startTime, long endTime, long timeSpan){
+        ArrayList<Long> range = new ArrayList<Long>();
+        for(long i = startTime/timeSpan;i<=endTime/timeSpan;i++){
+            range.add(i);
+        }
+        return range;
+    }
+
 
 }

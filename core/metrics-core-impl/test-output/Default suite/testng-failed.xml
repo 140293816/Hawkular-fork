@@ -3,13 +3,15 @@
 <suite name="Failed suite [Default suite]">
   <test name="Default test(failed)">
     <classes>
-      <class name="org.hawkular.metrics.core.impl.cassandra.DataAccessITest">
+      <class name="org.hawkular.metrics.core.impl.cassandra.DataAccessITest2">
         <methods>
-          <include name="getMetricTags"/>
+          <include name="insertAndFindGaugeRawDataByGaugeWithThreeBucketsOrderByASC"/>
           <include name="initMethod"/>
+          <include name="insertAndFindAvailabilitiesInThreeBuckets"/>
+          <include name="insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets"/>
           <include name="initClass"/>
         </methods>
-      </class> <!-- org.hawkular.metrics.core.impl.cassandra.DataAccessITest -->
+      </class> <!-- org.hawkular.metrics.core.impl.cassandra.DataAccessITest2 -->
     </classes>
   </test> <!-- Default test(failed) -->
 </suite> <!-- Failed suite [Default suite] -->
