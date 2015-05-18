@@ -57,6 +57,12 @@ public abstract class Metric<T extends MetricData> {
         this.id = id;
         this.tags = tags;
     }
+    
+    protected Metric(String tenantId, MetricId id, long dpart) {
+        this.tenantId = tenantId;
+        this.id = id;
+        this.dpart = dpart;       
+    }
 
     protected Metric(String tenantId, MetricId id, Map<String, String> tags, Integer dataRetention) {
         this.tenantId = tenantId;

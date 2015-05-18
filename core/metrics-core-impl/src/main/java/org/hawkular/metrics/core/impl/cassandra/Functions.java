@@ -33,7 +33,9 @@ import com.google.common.util.concurrent.ListenableFuture;
 
 import org.hawkular.metrics.core.api.AggregationTemplate;
 import org.hawkular.metrics.core.api.AvailabilityData;
+import org.hawkular.metrics.core.api.Gauge;
 import org.hawkular.metrics.core.api.Interval;
+import org.hawkular.metrics.core.api.MetricId;
 import org.hawkular.metrics.core.api.MetricType;
 import org.hawkular.metrics.core.api.GaugeData;
 import org.hawkular.metrics.core.api.Tenant;
@@ -60,11 +62,66 @@ public class Functions {
         TAGS,
         WRITE_TIME
     }
+    
+    private static enum GAUGE_ALL_COLS{
+        TENANT_ID,
+        METRIC,
+        INTERVAL,
+        DPAT,
+        TIME,
+        METRIC_TAGS,
+        DATA_RETENTION,
+        VALUE,
+        TAGS
+      
+    }
+    
+    private static enum GAUGE_METRIC{
+      TENANT_ID,
+      TYPE,
+      METRIC,
+      INTERVAL,
+      DPART
+    }
+    
+    private static enum TAG{
+        TAGS
+    }
 
     private Functions() {
     }
 
     public static final Function<List<ResultSet>, Void> TO_VOID = resultSets -> null;
+    
+    public static final Function<ResultSet, List<Map>> MAP_TAGS = resultSet ->
+    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getTags).collect(toList());
+    
+    public static Map getTags(Row row){
+        return row.getMap(TAG.TAGS.ordinal(), String.class, String.class);
+    }
+    
+    public static final Function<ResultSet, List<Gauge>> MAP_GAUGE_METRIC = resultSet ->
+    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeMetric).collect(toList());
+    
+    public static Gauge getGaugeMetric(Row row){
+        return new Gauge(
+                row.getString(GAUGE_METRIC.TENANT_ID.ordinal()),
+                new MetricId(row.getString(GAUGE_METRIC.METRIC.ordinal())),
+                row.getLong(GAUGE_METRIC.DPART.ordinal())
+                
+        );
+    }
+    
+    public static final Function<ResultSet, List<GaugeData>> MAP_GAUGE_DATA_WITH_SAME_TIMESTAMP = resultSet ->
+            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeDataWithSameTimestamp).collect(toList());
+    
+    private static GaugeData getGaugeDataWithSameTimestamp(Row row) {
+        return new GaugeData(
+                row.getUUID(GAUGE_ALL_COLS.TIME.ordinal()), row.getDouble(GAUGE_ALL_COLS.VALUE.ordinal()),
+                row.getMap(GAUGE_ALL_COLS.TAGS.ordinal(), String.class, String.class)
+        );
+    }
+
 
     public static final Function<ResultSet, List<GaugeData>> MAP_GAUGE_DATA = resultSet ->
             StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeData).collect(toList());

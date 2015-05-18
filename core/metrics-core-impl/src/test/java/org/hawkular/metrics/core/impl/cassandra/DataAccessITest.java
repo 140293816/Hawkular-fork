@@ -25,6 +25,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hawkular.metrics.core.api.AggregationTemplate;
 import org.hawkular.metrics.core.api.Availability;
@@ -323,13 +324,11 @@ public class DataAccessITest extends MetricsITest {
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
         
         ResultSetFuture queryFuture = dataAccess.findData(metric, start.plusMinutes(1).getMillis(),false);
+        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA_WITH_SAME_TIMESTAMP);
+        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        List<GaugeData> expected = asList(new GaugeData(start.plusMinutes(1).getMillis(),3));
         
-       List<Row> rows = queryFuture.get().all();
-       assertEquals(rows.size(),1,"find more than one record with this timestamp");
-       assertEquals(rows.get(0).getString("tenant_id"),"tenant-1","wrong tenant id");
-       assertEquals(rows.get(0).getString("metric"),"metric-1","wrong metric id");
-       assertEquals(rows.get(0).getDouble("n_value"),3.0,"wrong value");
-       assertEquals(UUIDs.unixTimestamp(rows.get(0).getUUID("time")),start.plusMinutes(1).getMillis(),"wrong timestamp");
+        assertEquals(actual, expected, "The data does not match the expected values");
     }
 
     @Test
@@ -689,22 +688,16 @@ public class DataAccessITest extends MetricsITest {
         
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
         
-        List<Row> rows = queryFuture.get().all();        
-        
-        assertEquals(rows.size(),2,"The number of partitioning key does not equal to the expected size, which is 2");
-        
-        ArrayList<String> metricList = new ArrayList<String>();
-        
-        for(Row i: rows){
-            metricList.add(i.getString("metric"));
-        }
-        assertTrue(metricList.contains("metric-1"),"metric-1 is missing");
-        assertTrue(metricList.contains("metric-2"),"metric-2 is missing");
+        ListenableFuture<List<Gauge>> dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        List<Gauge> metricList = getUninterruptibly(dataFuture);
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-2 is missing");
         
     }
     
     @Test
-    public void findGuageMeytricsWithTwoBuckets() throws Exception{
+    public void findAllGuageMeytricsWithTwoBuckets() throws Exception{
         DateTime start = now().minusMonths(1);
         
         Gauge metric1 = new Gauge("tenant-1", new MetricId("metric-1"));
@@ -724,26 +717,14 @@ public class DataAccessITest extends MetricsITest {
         
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
         
-        List<Row> rows = queryFuture.get().all();
+        ListenableFuture<List<Gauge>> dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        List<Gauge> metricList = getUninterruptibly(dataFuture);
         
-        assertEquals(rows.size(),4,"The number of partitioning key does not equal to the expected size, which is 4");
-        
-        ArrayList<Long> metric1Dpart = new ArrayList<Long>();
-        ArrayList<Long> metric2Dpart = new ArrayList<Long>();
-        for(Row i:rows)
-        {
-            if(i.getString("metric").equals("metric-1")){
-                metric1Dpart.add(i.getLong("dpart"));
-            }
-            else if(i.getString("metric").equals("metric-2")){
-                metric2Dpart.add(i.getLong("dpart"));
-            }
-        }
-        
-        assertTrue(metric1Dpart.contains(start.getMillis()/timeSpan),"dpart-1 of metric-1 is missing");
-        assertTrue(metric1Dpart.contains(start.plusWeeks(3).getMillis()/timeSpan), "dpart-2 of metric-1 is missing");
-        assertTrue(metric2Dpart.contains(start.getMillis()/timeSpan), "dpart-1 of metric-2 is missing");
-        assertTrue(metric2Dpart.contains(start.plusWeeks(3).getMillis()/timeSpan), "dpart-2 of metric-2 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.plusWeeks(3).getMillis()/timeSpan)), "metric-2 with dpart-2 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.plusWeeks(3).getMillis()/timeSpan)), "metric-2 with dpart-2 is missing");
     }
         
     
@@ -764,15 +745,20 @@ public class DataAccessITest extends MetricsITest {
        
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
         
-        List<Row> rows = queryFuture.get().all();
-        assertEquals(rows.size(),1,"wrong metric numbers");
-        assertEquals(rows.get(0).getString("metric"),"metric-1","wrong metric id");
+        ListenableFuture<List<Gauge>> dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        List<Gauge> metricList = getUninterruptibly(dataFuture);
+        
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
         
         dataAccess.deleteGuageMetric("tenant-1","metric-1",metric.getId().getInterval(), start.getMillis()/timeSpan);
         
         
-        ResultSetFuture result = dataAccess.findAllGuageMetrics();
-        assertEquals(result.get().all().size(),0,"records have not been deleted"); 
+        queryFuture = dataAccess.findAllGuageMetrics();
+        dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        metricList = getUninterruptibly(dataFuture);
+        assertTrue(metricList.isEmpty(),"records have not been deleted"); 
     }
     
     @Test 
@@ -796,12 +782,17 @@ public class DataAccessITest extends MetricsITest {
         
         ResultSetFuture queryFuture = dataAccess.getMetricTags(metric.getTenantId(), metric.getType(), metric.getId(), metric.getDpart());
         
-        List<Row> rows = queryFuture.get().all();
+        ListenableFuture<List<Map>> dataFuture = Futures.transform(queryFuture, Functions.MAP_TAGS);
         
-        assertEquals(rows.size(),3,"found more than 3 records in this partition");
-        for(Row i: rows){
-            assertEquals(i.getMap("m_tags", String.class, String.class), ImmutableMap.of("units", "KB", "env", "test"));
+        List<Map> actual = getUninterruptibly(dataFuture);
+        
+        List<Map> expected = new ArrayList<Map>();
+        
+        for(int i=0;i<3;i++){
+            expected.add(ImmutableMap.of("units", "KB", "env", "test"));
         }
+        
+        assertEquals(actual, expected, "Tags do not match the expected values");
         
     }
     

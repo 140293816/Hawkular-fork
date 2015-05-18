@@ -38,7 +38,7 @@ public class Availability extends Metric<AvailabilityData> {
     public Availability(String tenantId, MetricId id, Map<String, String> tags) {
         super(tenantId, id, tags);
     }
-
+    
     public Availability(String tenantId, MetricId id, Map<String, String> tags, Integer dataRetention) {
         super(tenantId, id, tags, dataRetention);
     }

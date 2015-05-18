@@ -39,7 +39,10 @@ public class Gauge extends Metric<GaugeData> {
     public Gauge(String tenantId, MetricId id, Map<String, String> tags) {
         super(tenantId, id, tags);
     }
-
+    
+    public Gauge(String tenantId, MetricId id, long dpart) {
+        super(tenantId, id, dpart);
+    }
     public Gauge(String tenantId, MetricId id, Map<String, String> tags, Integer dataRetention) {
         super(tenantId, id, tags, dataRetention);
     }

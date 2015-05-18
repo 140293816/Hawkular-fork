@@ -58,9 +58,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  */
 public class DataAccessITest2 extends MetricsITest {
 
-    private DataAccessImpl dataAccess;
-    
-    private DataAccessImpl2 dataAccess2;
+    private DataAccessImpl2 dataAccess;
   
     private PreparedStatement truncateTenants;
 
@@ -73,8 +71,7 @@ public class DataAccessITest2 extends MetricsITest {
     @BeforeClass
     public void initClass() {
         initSession();
-        dataAccess = new DataAccessImpl(session);
-        dataAccess2 = new DataAccessImpl2(session);
+        dataAccess = new DataAccessImpl2(session);
         truncateTenants = session.prepare("TRUNCATE tenants");
         truncateGaugeData = session.prepare("TRUNCATE data");
         truncateCounters = session.prepare("TRUNCATE counters");
@@ -137,13 +134,11 @@ public class DataAccessITest2 extends MetricsITest {
         for(GaugeData i : list){
             metric.addData(i);
         }       
-
+        
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        ResultSetFuture queryFuture = dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
-                now().getMillis());
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA);
-        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+                now().getMillis()));
         
         assertEquals(actual, list, "The data does not match the expected values");
     }
@@ -161,10 +156,8 @@ public class DataAccessITest2 extends MetricsITest {
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        ResultSetFuture queryFuture = dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
-                now().getMillis());
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA);
-        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+                now().getMillis()));
         
         assertEquals(actual, list, "The data does not match the expected values");
     }
@@ -180,15 +173,10 @@ public class DataAccessITest2 extends MetricsITest {
             metric.addData(i);
         }       
 
-        getUninterruptibly(dataAccess2.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
+        getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<ResultSetFuture> queryFuture = dataAccess2.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
-                now().getMillis());
-        List<GaugeData> actual = new ArrayList<GaugeData>();
-        for(ResultSetFuture i: queryFuture){
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA);
-        actual.addAll(getUninterruptibly(dataFuture));
-        }
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+                now().getMillis()));
         
         assertEquals(actual, list, "The data does not match the expected values");
     }
@@ -205,10 +193,8 @@ public class DataAccessITest2 extends MetricsITest {
         }       
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-
-        ResultSetFuture queryFuture = dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC);
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA);
-        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC));
         
         assertEquals(actual, list, "The data does not match the expected values");
     }
@@ -226,9 +212,7 @@ public class DataAccessITest2 extends MetricsITest {
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        ResultSetFuture queryFuture = dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC);
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA);
-        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC));
         
         assertEquals(actual, list, "The data does not match the expected values");
     }
@@ -245,14 +229,10 @@ public class DataAccessITest2 extends MetricsITest {
         }
        
 
-        getUninterruptibly(dataAccess2.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-
-        List<ResultSetFuture> queryFuture = dataAccess2.findData(metric, start.getMillis(), now().getMillis(), Order.DESC);
-        List<GaugeData> actual = new ArrayList<GaugeData>();
-        for(ResultSetFuture i: queryFuture){
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA);
-        actual.addAll(getUninterruptibly(dataFuture));
-        }        
+        getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
+        
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC));
+        
         assertEquals(actual, list, "The data does not match the expected values");
     }
     
@@ -270,9 +250,8 @@ public class DataAccessITest2 extends MetricsITest {
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        ResultSetFuture queryFuture = dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC);
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA);
-        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC));
+        
         assertEquals(actual, list, "The data does not match the expected values");
     }
     
@@ -290,9 +269,9 @@ public class DataAccessITest2 extends MetricsITest {
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        ResultSetFuture queryFuture = dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC);
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA);
-        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC));       
+      
+        
         assertEquals(actual, list, "The data does not match the expected values");
     }
     
@@ -308,14 +287,10 @@ public class DataAccessITest2 extends MetricsITest {
             metric.addData(i);
         }
 
-        getUninterruptibly(dataAccess2.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
+        getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<ResultSetFuture> queryFuture = dataAccess2.findData(metric, start.getMillis(), now().getMillis(), Order.ASC);
-        List<GaugeData> actual = new ArrayList<GaugeData>();
-        for(ResultSetFuture i: queryFuture){
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA);
-        actual.addAll(getUninterruptibly(dataFuture));
-        }
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC));   
+        
         assertEquals(actual, list, "The data does not match the expected values");
     }
     
@@ -334,13 +309,11 @@ public class DataAccessITest2 extends MetricsITest {
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
         
         ResultSetFuture queryFuture = dataAccess.findData(metric, start.plusMinutes(1).getMillis(),false);
+        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA_WITH_SAME_TIMESTAMP);
+        List<GaugeData> actual = getUninterruptibly(dataFuture);
+        List<GaugeData> expected = asList(new GaugeData(start.plusMinutes(1).getMillis(),3));
         
-       List<Row> rows = queryFuture.get().all();
-       assertEquals(rows.size(),1,"find more than one record with this timestamp");
-       assertEquals(rows.get(0).getString("tenant_id"),"tenant-1","wrong tenant id");
-       assertEquals(rows.get(0).getString("metric"),"metric-1","wrong metric id");
-       assertEquals(rows.get(0).getDouble("n_value"),3.0,"wrong value");
-       assertEquals(UUIDs.unixTimestamp(rows.get(0).getUUID("time")),start.plusMinutes(1).getMillis(),"wrong timestamp");
+        assertEquals(actual, expected, "The data does not match the expected values");
     }
 
     @Test
@@ -359,11 +332,9 @@ public class DataAccessITest2 extends MetricsITest {
         metric.addData(new GaugeData(start.plusMinutes(4).getMillis(), 1.234));
         metric.addData(new GaugeData(end.getMillis(), 1.234));
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-
-        ResultSetFuture queryFuture = dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
-                end.getMillis());
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA);
-        List<GaugeData> actual = getUninterruptibly(dataFuture);
+       
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+                end.getMillis()));
         List<GaugeData> expected = asList(
             new GaugeData(start.plusMinutes(4).getMillis(), 1.234),
             new GaugeData(start.plusMinutes(2).getMillis(), 1.234),
@@ -504,13 +475,9 @@ public class DataAccessITest2 extends MetricsITest {
             metric.addData(i);
         }      
         getUninterruptibly(dataAccess.insertData(metric, 360));
-
-        ResultSetFuture future = dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
-                now().getMillis());
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(future, Functions.MAP_AVAILABILITY_DATA);
-        List<AvailabilityData> actual = getUninterruptibly(dataFuture);
        
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
+                now().getMillis()));       
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -526,12 +493,8 @@ public class DataAccessITest2 extends MetricsITest {
         }      
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        ResultSetFuture future = dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
-                now().getMillis());
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(future, Functions.MAP_AVAILABILITY_DATA);
-        List<AvailabilityData> actual = getUninterruptibly(dataFuture);
-       
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
+                now().getMillis()));          
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -545,16 +508,10 @@ public class DataAccessITest2 extends MetricsITest {
         for(AvailabilityData i: list){
             metric.addData(i);
         }      
-        getUninterruptibly(dataAccess2.insertData(metric, 360));
+        getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<ResultSetFuture> future = dataAccess2.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
-                now().getMillis());
-        List<AvailabilityData> actual = new ArrayList<AvailabilityData>();
-        for(ResultSetFuture i: future){
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(i, Functions.MAP_AVAILABILITY_DATA);
-        actual.addAll(getUninterruptibly(dataFuture));
-        }
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
+                now().getMillis()));   
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -572,10 +529,7 @@ public class DataAccessITest2 extends MetricsITest {
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        ResultSetFuture future = dataAccess.findData(metric, start.getMillis(),now().getMillis());
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(future, Functions.MAP_AVAILABILITY_DATA);
-        List<AvailabilityData> actual = getUninterruptibly(dataFuture);
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(),now().getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -592,10 +546,7 @@ public class DataAccessITest2 extends MetricsITest {
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        ResultSetFuture future = dataAccess.findData(metric, start.getMillis(),now().getMillis());
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(future, Functions.MAP_AVAILABILITY_DATA);
-        List<AvailabilityData> actual = getUninterruptibly(dataFuture);
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(),now().getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -611,15 +562,9 @@ public class DataAccessITest2 extends MetricsITest {
             metric.addData(i);
         }        
 
-        getUninterruptibly(dataAccess2.insertData(metric, 360));
+        getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<ResultSetFuture> future = dataAccess2.findData(metric, start.getMillis(),now().getMillis());
-        List<AvailabilityData> actual = new ArrayList<AvailabilityData>();
-        for(ResultSetFuture i: future){
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(i, Functions.MAP_AVAILABILITY_DATA);
-        actual.addAll(getUninterruptibly(dataFuture));
-        }
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(),now().getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -635,11 +580,8 @@ public class DataAccessITest2 extends MetricsITest {
         }        
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
-
-        ResultSetFuture future = dataAccess.findData(metric, start.getMillis(),now().getMillis(), true);
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(future, Functions.MAP_AVAILABILITY_WITH_WRITE_TIME);
-        List<AvailabilityData> actual = getUninterruptibly(dataFuture);
+        
+        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric, start.getMillis(),now().getMillis(), true));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -656,10 +598,7 @@ public class DataAccessITest2 extends MetricsITest {
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        ResultSetFuture future = dataAccess.findData(metric, start.getMillis(),now().getMillis(), true);
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(future, Functions.MAP_AVAILABILITY_WITH_WRITE_TIME);
-        List<AvailabilityData> actual = getUninterruptibly(dataFuture);
+        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric, start.getMillis(),now().getMillis(), true));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
@@ -674,19 +613,13 @@ public class DataAccessITest2 extends MetricsITest {
             metric.addData(i);
         }        
 
-        getUninterruptibly(dataAccess2.insertData(metric, 360));
-
-        List<ResultSetFuture> future = dataAccess2.findData(metric, start.getMillis(),now().getMillis(), true);
-        List<AvailabilityData> actual = new ArrayList<AvailabilityData>();
-        for(ResultSetFuture i: future){
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures
-                .transform(i, Functions.MAP_AVAILABILITY_DATA);
-        actual.addAll(getUninterruptibly(dataFuture));
-        }
-
+        getUninterruptibly(dataAccess.insertData(metric, 360));
+        
+        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric, start.getMillis(),now().getMillis(), true));       
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
+    
     
     @Test
     public void findAllGaugeWithOneBucket() throws Exception{
@@ -709,22 +642,16 @@ public class DataAccessITest2 extends MetricsITest {
         
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
         
-        List<Row> rows = queryFuture.get().all();        
-        
-        assertEquals(rows.size(),2,"The number of partitioning key does not equal to the expected size, which is 2");
-        
-        ArrayList<String> metricList = new ArrayList<String>();
-        
-        for(Row i: rows){
-            metricList.add(i.getString("metric"));
-        }
-        assertTrue(metricList.contains("metric-1"),"metric-1 is missing");
-        assertTrue(metricList.contains("metric-2"),"metric-2 is missing");
+        ListenableFuture<List<Gauge>> dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        List<Gauge> metricList = getUninterruptibly(dataFuture);
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-2 is missing");
         
     }
     
     @Test
-    public void findGuageMeytricsWithTwoBuckets() throws Exception{
+    public void findAllGuageMeytricsWithTwoBuckets() throws Exception{
         DateTime start = now().minusMonths(1);
         
         Gauge metric1 = new Gauge("tenant-1", new MetricId("metric-1"));
@@ -744,26 +671,14 @@ public class DataAccessITest2 extends MetricsITest {
         
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
         
-        List<Row> rows = queryFuture.get().all();
+        ListenableFuture<List<Gauge>> dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        List<Gauge> metricList = getUninterruptibly(dataFuture);
         
-        assertEquals(rows.size(),4,"The number of partitioning key does not equal to the expected size, which is 4");
-        
-        ArrayList<Long> metric1Dpart = new ArrayList<Long>();
-        ArrayList<Long> metric2Dpart = new ArrayList<Long>();
-        for(Row i:rows)
-        {
-            if(i.getString("metric").equals("metric-1")){
-                metric1Dpart.add(i.getLong("dpart"));
-            }
-            else if(i.getString("metric").equals("metric-2")){
-                metric2Dpart.add(i.getLong("dpart"));
-            }
-        }
-        
-        assertTrue(metric1Dpart.contains(start.getMillis()/timeSpan),"dpart-1 of metric-1 is missing");
-        assertTrue(metric1Dpart.contains(start.plusWeeks(3).getMillis()/timeSpan), "dpart-2 of metric-1 is missing");
-        assertTrue(metric2Dpart.contains(start.getMillis()/timeSpan), "dpart-1 of metric-2 is missing");
-        assertTrue(metric2Dpart.contains(start.plusWeeks(3).getMillis()/timeSpan), "dpart-2 of metric-2 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.plusWeeks(3).getMillis()/timeSpan)), "metric-2 with dpart-2 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.plusWeeks(3).getMillis()/timeSpan)), "metric-2 with dpart-2 is missing");
     }
         
     
@@ -784,47 +699,22 @@ public class DataAccessITest2 extends MetricsITest {
        
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
         
-        List<Row> rows = queryFuture.get().all();
-        assertEquals(rows.size(),1,"wrong metric numbers");
-        assertEquals(rows.get(0).getString("metric"),"metric-1","wrong metric id");
+        ListenableFuture<List<Gauge>> dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        List<Gauge> metricList = getUninterruptibly(dataFuture);
+        
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
         
         dataAccess.deleteGuageMetric("tenant-1","metric-1",metric.getId().getInterval(), start.getMillis()/timeSpan);
         
         
-        ResultSetFuture result = dataAccess.findAllGuageMetrics();
-        assertEquals(result.get().all().size(),0,"records have not been deleted"); 
+        queryFuture = dataAccess.findAllGuageMetrics();
+        dataFuture = Futures
+                .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
+        metricList = getUninterruptibly(dataFuture);
+        assertTrue(metricList.isEmpty(),"records have not been deleted"); 
     }
-    
-    @Test 
-    public void getMetricTags() throws Exception{
-        DateTime start = now().minusMinutes(10);  
-        
-        Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));     
-        
-        List<GaugeData> list = generateTestGuageDESC(1,start);
-        for(GaugeData i : list)
-        {
-            metric.addData(i);            
-        }    
-        
-             
-        getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-        
-        metric.setDpart(start.getMillis()/timeSpan);
-        
-        getUninterruptibly(dataAccess.addTags(metric, ImmutableMap.of("units", "KB", "env", "test")));
-        
-        ResultSetFuture queryFuture = dataAccess.getMetricTags(metric.getTenantId(), metric.getType(), metric.getId(), metric.getDpart());
-        
-        List<Row> rows = queryFuture.get().all();
-        
-        assertEquals(rows.size(),3,"found more than 3 records in this partition");
-        for(Row i: rows){
-            assertEquals(i.getMap("m_tags", String.class, String.class), ImmutableMap.of("units", "KB", "env", "test"));
-        }
-        
-    }
-    
+       
     private List<GaugeData> generateTestGaugeASC(int numBuckets, DateTime time){
         ArrayList<GaugeData> list = new ArrayList<GaugeData>();
         DateTime dataPoint = time;
@@ -875,6 +765,42 @@ public class DataAccessITest2 extends MetricsITest {
         }
         
         return list;
+    }
+    
+    private List<GaugeData> sortGaugeData(List<ResultSetFuture> queryFuture) throws Exception{
+        List<GaugeData> result = new ArrayList<GaugeData>();
+        for(ResultSetFuture i: queryFuture){
+        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA);
+        result.addAll(getUninterruptibly(dataFuture));
+        }
+        return result;
+    }
+    
+    private List<AvailabilityData> sortAvailabilityData(List<ResultSetFuture> queryFuture) throws Exception{
+        List<AvailabilityData> result = new ArrayList<AvailabilityData>();
+        for(ResultSetFuture i: queryFuture){
+        ListenableFuture<List<AvailabilityData>> dataFuture = Futures.transform(i, Functions.MAP_AVAILABILITY_DATA);
+        result.addAll(getUninterruptibly(dataFuture));
+        }
+        return result;
+    }
+    
+    private List<GaugeData> sortGaugeDataWithWriteTime(List<ResultSetFuture> queryFuture) throws Exception{
+        List<GaugeData> result = new ArrayList<GaugeData>();
+        for(ResultSetFuture i: queryFuture){
+        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA_WITH_WRITE_TIME);
+        result.addAll(getUninterruptibly(dataFuture));
+        }
+        return result;
+    }
+    
+    private List<AvailabilityData> sortAvailabilityDataWithWriteTime(List<ResultSetFuture> queryFuture) throws Exception{
+        List<AvailabilityData> result = new ArrayList<AvailabilityData>();
+        for(ResultSetFuture i: queryFuture){
+        ListenableFuture<List<AvailabilityData>> dataFuture = Futures.transform(i, Functions.MAP_AVAILABILITY_WITH_WRITE_TIME);
+        result.addAll(getUninterruptibly(dataFuture));
+        }
+        return result;
     }
 
 }
