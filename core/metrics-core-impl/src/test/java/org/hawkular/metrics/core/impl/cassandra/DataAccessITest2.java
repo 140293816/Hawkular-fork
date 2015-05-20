@@ -45,8 +45,6 @@ import org.testng.annotations.Test;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
-import com.datastax.driver.core.Row;
-import com.datastax.driver.core.utils.UUIDs;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -59,13 +57,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class DataAccessITest2 extends MetricsITest {
 
     private DataAccessImpl2 dataAccess;
-  
+
     private PreparedStatement truncateTenants;
 
     private PreparedStatement truncateGaugeData;
 
     private PreparedStatement truncateCounters;
-    
+
     private static final long timeSpan = 1814400000L;
 
     @BeforeClass
@@ -87,21 +85,20 @@ public class DataAccessITest2 extends MetricsITest {
     @Test
     public void insertAndFindTenant() throws Exception {
         Tenant tenant1 = new Tenant().setId("tenant-1")
-            .addAggregationTemplate(new AggregationTemplate()
-                .setType(MetricType.GAUGE)
-                .setInterval(new Interval(5, Interval.Units.MINUTES))
-                .setFunctions(ImmutableSet.of("max", "min", "avg")))
-            .setRetention(MetricType.GAUGE, Days.days(31).toStandardHours().getHours())
-            .setRetention(MetricType.GAUGE, new Interval(5, Interval.Units.MINUTES),
-                Days.days(100).toStandardHours().getHours());
+                .addAggregationTemplate(new AggregationTemplate()
+                        .setType(MetricType.GAUGE)
+                        .setInterval(new Interval(5, Interval.Units.MINUTES))
+                        .setFunctions(ImmutableSet.of("max", "min", "avg")))
+                .setRetention(MetricType.GAUGE, Days.days(31).toStandardHours().getHours())
+                .setRetention(MetricType.GAUGE, new Interval(5, Interval.Units.MINUTES),
+                        Days.days(100).toStandardHours().getHours());
 
         Tenant tenant2 = new Tenant().setId("tenant-2")
-            .setRetention(MetricType.GAUGE, Days.days(14).toStandardHours().getHours())
-            .addAggregationTemplate(new AggregationTemplate()
-                .setType(MetricType.GAUGE)
-                .setInterval(new Interval(5, Interval.Units.HOURS))
-                .setFunctions(ImmutableSet.of("sum", "count")));
-
+                .setRetention(MetricType.GAUGE, Days.days(14).toStandardHours().getHours())
+                .addAggregationTemplate(new AggregationTemplate()
+                        .setType(MetricType.GAUGE)
+                        .setInterval(new Interval(5, Interval.Units.HOURS))
+                        .setFunctions(ImmutableSet.of("sum", "count")));
 
         ResultSetFuture insertFuture = dataAccess.insertTenant(tenant1);
         getUninterruptibly(insertFuture);
@@ -122,197 +119,200 @@ public class DataAccessITest2 extends MetricsITest {
         getUninterruptibly(dataAccess.insertTenant(new Tenant().setId("tenant-1")));
         ResultSet resultSet = getUninterruptibly(dataAccess.insertTenant(new Tenant().setId("tenant-1")));
         assertFalse(resultSet.wasApplied(), "Tenants should not be overwritten");
-    }  
-  
+    }
+
     @Test
     public void insertAndFindGaugeRawDataWithOneBucket() throws Exception {
         DateTime start = now().minusMinutes(10);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGuageDESC(1,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(1, start);
+        for (GaugeData i : list) {
             metric.addData(i);
-        }       
-        
+        }
+
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"),
+                start.getMillis(),
                 now().getMillis()));
-        
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
+
     @Test
     public void insertAndFindGaugeRawDataWithTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGuageDESC(2,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(2, start);
+        for (GaugeData i : list) {
             metric.addData(i);
-        }       
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"),
+                start.getMillis(),
                 now().getMillis()));
-        
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
+
     @Test
     public void insertAndFindGaugeRawDataWithThreeBuckets() throws Exception {
         DateTime start = now().minusMonths(2);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGuageDESC(3,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(3, start);
+        for (GaugeData i : list) {
             metric.addData(i);
-        }       
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"),
+                start.getMillis(),
                 now().getMillis()));
-        
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
+
     @Test
     public void insertAndFindGaugeRawDataByGaugeWithOneBucket() throws Exception {
         DateTime start = now().minusMinutes(10);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGuageDESC(1,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(1, start);
+        for (GaugeData i : list) {
             metric.addData(i);
-        }       
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-        
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC));
-        
+
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(),
+                Order.DESC));
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
+
     @Test
     public void insertAndFindGaugeRawDataByGaugeWithTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGuageDESC(2,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(2, start);
+        for (GaugeData i : list) {
             metric.addData(i);
-        }       
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC));
-        
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(),
+                Order.DESC));
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
+
     @Test
     public void insertAndFindGaugeRawDataByGaugeWithThreeBuckets() throws Exception {
         DateTime start = now().minusMonths(2);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGuageDESC(3,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(3, start);
+        for (GaugeData i : list) {
             metric.addData(i);
         }
-       
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-        
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.DESC));
-        
+
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(),
+                Order.DESC));
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
-    
+
     @Test
     public void insertAndFindGaugeRawDataByGaugeWitOneBucketOrderByASC() throws Exception {
         DateTime start = now().minusMinutes(10);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGaugeASC(1,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGaugeASC(1, start);
+        for (GaugeData i : list) {
             metric.addData(i);
         }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC));
-        
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(),
+                Order.ASC));
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
-    
+
     @Test
     public void insertAndFindGaugeRawDataByGaugeWithTwoBucketsOrderByASC() throws Exception {
         DateTime start = now().minusMonths(1);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGaugeASC(2,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGaugeASC(2, start);
+        for (GaugeData i : list) {
             metric.addData(i);
         }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC));       
-      
-        
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(),
+                Order.ASC));
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
-    
+
     @Test
     public void insertAndFindGaugeRawDataByGaugeWithThreeBucketsOrderByASC() throws Exception {
         DateTime start = now().minusMonths(2);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        
-        List<GaugeData> list = generateTestGaugeASC(3,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGaugeASC(3, start);
+        for (GaugeData i : list) {
             metric.addData(i);
         }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
 
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(), Order.ASC));   
-        
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData(metric, start.getMillis(), now().getMillis(),
+                Order.ASC));
+
         assertEquals(actual, list, "The data does not match the expected values");
     }
-    
-    
-    
+
     @Test
-    public void insertAndFindSingleGaugeData() throws Exception{
+    public void insertAndFindSingleGaugeData() throws Exception {
         DateTime start = now().minusMinutes(10);
-        
+
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
-        List<GaugeData> list = generateTestGuageDESC(1,start);
-        for(GaugeData i : list){
+        List<GaugeData> list = generateTestGuageDESC(1, start);
+        for (GaugeData i : list) {
             metric.addData(i);
-        }       
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-        
-        ResultSetFuture queryFuture = dataAccess.findData(metric, start.plusMinutes(1).getMillis(),false);
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, Functions.MAP_GAUGE_DATA_WITH_SAME_TIMESTAMP);
+
+        ResultSetFuture queryFuture = dataAccess.findData(metric, start.plusMinutes(1).getMillis(), false);
+        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture,
+                Functions.MAP_GAUGE_DATA_WITH_SAME_TIMESTAMP);
         List<GaugeData> actual = getUninterruptibly(dataFuture);
-        List<GaugeData> expected = asList(new GaugeData(start.plusMinutes(1).getMillis(),3));
-        
+        List<GaugeData> expected = asList(new GaugeData(start.plusMinutes(1).getMillis(), 3));
+
         assertEquals(actual, expected, "The data does not match the expected values");
     }
 
@@ -322,7 +322,7 @@ public class DataAccessITest2 extends MetricsITest {
         DateTime end = start.plusMinutes(6);
 
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"),
-            ImmutableMap.of("units", "KB", "env", "test"));
+                ImmutableMap.of("units", "KB", "env", "test"));
 
         ResultSetFuture insertFuture = dataAccess.addTagsAndDataRetention(metric);
         getUninterruptibly(insertFuture);
@@ -332,69 +332,71 @@ public class DataAccessITest2 extends MetricsITest {
         metric.addData(new GaugeData(start.plusMinutes(4).getMillis(), 1.234));
         metric.addData(new GaugeData(end.getMillis(), 1.234));
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-       
-        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"), start.getMillis(),
+
+        List<GaugeData> actual = sortGaugeData(dataAccess.findData("tenant-1", new MetricId("metric-1"),
+                start.getMillis(),
                 end.getMillis()));
         List<GaugeData> expected = asList(
-            new GaugeData(start.plusMinutes(4).getMillis(), 1.234),
-            new GaugeData(start.plusMinutes(2).getMillis(), 1.234),
-            new GaugeData(start.getMillis(), 1.23)
-        );
+                new GaugeData(start.plusMinutes(4).getMillis(), 1.234),
+                new GaugeData(start.plusMinutes(2).getMillis(), 1.234),
+                new GaugeData(start.getMillis(), 1.23)
+                );
 
         assertEquals(actual, expected, "The data does not match the expected values");
     }
 
-//    @Test
-//    public void insertAndFindAggregatedGaugeData() throws Exception {
-//        DateTime start = now().minusMinutes(10);
-//        DateTime end = start.plusMinutes(6);
-//
-//        Metric metric = new Metric()
-//            .setTenantId("tenant-1")
-//            .setId(new MetricId("m1", Interval.parse("5min")));
-//        List<GaugeData> data = asList(
-//
-//        );
-//
-//        GaugeData d1 = new GaugeData()
-//            .setTenantId("tenant-1")
-//            .setId(new MetricId("m1", Interval.parse("5min")))
-//            .setTimestamp(start.getMillis())
-//            .addAggregatedValue(new AggregatedValue("sum", 100.1))
-//            .addAggregatedValue(new AggregatedValue("max", 51.5, null, null, getTimeUUID(now().minusMinutes(3))));
-//
-//        GaugeData d2 = new GaugeData()
-//            .setTenantId("tenant-1")
-//            .setId(new MetricId("m1", Interval.parse("5min")))
-//            .setTimestamp(start.plusMinutes(2).getMillis())
-//            .addAggregatedValue(new AggregatedValue("sum", 110.1))
-//            .addAggregatedValue(new AggregatedValue("max", 54.7, null, null, getTimeUUID(now().minusMinutes(3))));
-//
-//        GaugeData d3 = new GaugeData()
-//            .setTenantId("tenant-1")
-//            .setId(new MetricId("m1", Interval.parse("5min")))
-//            .setTimestamp(start.plusMinutes(4).getMillis())
-//            .setValue(22.2);
-//
-//        GaugeData d4 = new GaugeData()
-//            .setTenantId("tenant-1")
-//            .setId(new MetricId("m1", Interval.parse("5min")))
-//            .setTimestamp(end.getMillis())
-//            .setValue(22.2);
-//
-//        getUninterruptibly(dataAccess.insertGaugeData(d1));
-//        getUninterruptibly(dataAccess.insertGaugeData(d2));
-//        getUninterruptibly(dataAccess.insertGaugeData(d3));
-//        getUninterruptibly(dataAccess.insertGaugeData(d4));
-//
-//        ResultSetFuture queryFuture = dataAccess.findGaugeData(d1.getTenantId(), d1.getId(), 0L, start.getMillis(),
-//            end.getMillis());
-//        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, new GaugeDataMapper());
-//        List<GaugeData> actual = getUninterruptibly(dataFuture);
-//        List<GaugeData> expected = asList(d3, d2, d1);
-//
-//        assertEquals(actual, expected, "The aggregated gauge data does not match");
-//    }
+    //    @Test
+    //    public void insertAndFindAggregatedGaugeData() throws Exception {
+    //        DateTime start = now().minusMinutes(10);
+    //        DateTime end = start.plusMinutes(6);
+    //
+    //        Metric metric = new Metric()
+    //            .setTenantId("tenant-1")
+    //            .setId(new MetricId("m1", Interval.parse("5min")));
+    //        List<GaugeData> data = asList(
+    //
+    //        );
+    //
+    //        GaugeData d1 = new GaugeData()
+    //            .setTenantId("tenant-1")
+    //            .setId(new MetricId("m1", Interval.parse("5min")))
+    //            .setTimestamp(start.getMillis())
+    //            .addAggregatedValue(new AggregatedValue("sum", 100.1))
+    //            .addAggregatedValue(new AggregatedValue("max", 51.5, null, null, getTimeUUID(now().minusMinutes(3))));
+    //
+    //        GaugeData d2 = new GaugeData()
+    //            .setTenantId("tenant-1")
+    //            .setId(new MetricId("m1", Interval.parse("5min")))
+    //            .setTimestamp(start.plusMinutes(2).getMillis())
+    //            .addAggregatedValue(new AggregatedValue("sum", 110.1))
+    //            .addAggregatedValue(new AggregatedValue("max", 54.7, null, null, getTimeUUID(now().minusMinutes(3))));
+    //
+    //        GaugeData d3 = new GaugeData()
+    //            .setTenantId("tenant-1")
+    //            .setId(new MetricId("m1", Interval.parse("5min")))
+    //            .setTimestamp(start.plusMinutes(4).getMillis())
+    //            .setValue(22.2);
+    //
+    //        GaugeData d4 = new GaugeData()
+    //            .setTenantId("tenant-1")
+    //            .setId(new MetricId("m1", Interval.parse("5min")))
+    //            .setTimestamp(end.getMillis())
+    //            .setValue(22.2);
+    //
+    //        getUninterruptibly(dataAccess.insertGaugeData(d1));
+    //        getUninterruptibly(dataAccess.insertGaugeData(d2));
+    //        getUninterruptibly(dataAccess.insertGaugeData(d3));
+    //        getUninterruptibly(dataAccess.insertGaugeData(d4));
+    //
+    //        ResultSetFuture queryFuture =
+    //            dataAccess.findGaugeData(d1.getTenantId(), d1.getId(), 0L, start.getMillis(),
+    //            end.getMillis());
+    //        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(queryFuture, new GaugeDataMapper());
+    //        List<GaugeData> actual = getUninterruptibly(dataFuture);
+    //        List<GaugeData> expected = asList(d3, d2, d1);
+    //
+    //        assertEquals(actual, expected, "The aggregated gauge data does not match");
+    //    }
 
     @Test
     public void updateCounterAndFindCounter() throws Exception {
@@ -415,10 +417,10 @@ public class DataAccessITest2 extends MetricsITest {
         String tenantId = "t1";
         String group = "batch-test";
         List<Counter> expected = ImmutableList.of(
-            new Counter(tenantId, group, "c1", 1),
-            new Counter(tenantId, group, "c2", 2),
-            new Counter(tenantId, group, "c3", 3)
-        );
+                new Counter(tenantId, group, "c1", 1),
+                new Counter(tenantId, group, "c2", 2),
+                new Counter(tenantId, group, "c3", 3)
+                );
 
         ResultSetFuture future = dataAccess.updateCounters(expected);
         getUninterruptibly(future);
@@ -462,7 +464,7 @@ public class DataAccessITest2 extends MetricsITest {
         List<Counter> expected = asList(c1, c3);
 
         assertEquals(actual, expected,
-            "The counters do not match the expected values when filtering by group and by counter names");
+                "The counters do not match the expected values when filtering by group and by counter names");
     }
 
     @Test
@@ -470,335 +472,352 @@ public class DataAccessITest2 extends MetricsITest {
         DateTime start = now().minusMinutes(10);
         String tenantId = "avail-test";
         Availability metric = new Availability(tenantId, new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityASC(1,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityASC(1, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }      
+        }
         getUninterruptibly(dataAccess.insertData(metric, 360));
-       
-        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
-                now().getMillis()));       
+
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId(
+                "m1"), start.getMillis(),
+                now().getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
+
     @Test
     public void insertAndFindAvailabilitiesInTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
         String tenantId = "avail-test";
         Availability metric = new Availability(tenantId, new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityASC(2,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityASC(2, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }      
+        }
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
-                now().getMillis()));          
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId(
+                "m1"), start.getMillis(),
+                now().getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
+
     @Test
     public void insertAndFindAvailabilitiesInThreeBuckets() throws Exception {
         DateTime start = now().minusMonths(3);
         String tenantId = "avail-test";
         Availability metric = new Availability(tenantId, new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityASC(3,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityASC(3, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }      
+        }
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(),
-                now().getMillis()));   
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findAvailabilityData(tenantId, new MetricId(
+                "m1"), start.getMillis(),
+                now().getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
-    
+
     @Test
-    public void insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket() throws Exception{
+    public void insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket() throws Exception {
         DateTime start = now().minusMinutes(10);
-        
+
         Availability metric = new Availability("avail-test", new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityASC(1,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityASC(1, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }        
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(),now().getMillis()));
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(), now()
+                .getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
+
     @Test
-    public void insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets() throws Exception{
+    public void insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
-        
+
         Availability metric = new Availability("avail-test", new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityASC(2,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityASC(2, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }        
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(),now().getMillis()));
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(), now()
+                .getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
-    
+
     @Test
-    public void insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets() throws Exception{
+    public void insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets() throws Exception {
         DateTime start = now().minusMonths(2);
-        
+
         Availability metric = new Availability("avail-test", new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityASC(3,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityASC(3, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }        
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(),now().getMillis()));
+        List<AvailabilityData> actual = sortAvailabilityData(dataAccess.findData(metric, start.getMillis(), now()
+                .getMillis()));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
-    @Test 
-    public void insertAndFindAvailbilitiesWithWriteTimeInOneBucket() throws Exception{
+
+    @Test
+    public void insertAndFindAvailbilitiesWithWriteTimeInOneBucket() throws Exception {
         DateTime start = now().minusMinutes(10);
-        
+
         Availability metric = new Availability("avail-test", new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityDESC(1,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityDESC(1, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }        
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
-        
-        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric, start.getMillis(),now().getMillis(), true));
+
+        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric,
+                start.getMillis(), now().getMillis(), true));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
-    @Test 
-    public void insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets() throws Exception{
+
+    @Test
+    public void insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
-        
+
         Availability metric = new Availability("avail-test", new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityDESC(2,start);
-        for(AvailabilityData i: list){
+        List<AvailabilityData> list = generateTestAvailabilityDESC(2, start);
+        for (AvailabilityData i : list) {
             metric.addData(i);
-        }        
+        }
 
         getUninterruptibly(dataAccess.insertData(metric, 360));
 
-        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric, start.getMillis(),now().getMillis(), true));
+        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric,
+                start.getMillis(), now().getMillis(), true));
 
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
-    
-    @Test 
-    public void insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets() throws Exception{
-        DateTime start = now().minusMonths(2);
-        
-        Availability metric = new Availability("avail-test", new MetricId("m1"));
-        List<AvailabilityData> list = generateTestAvailabilityDESC(3,start);
-        for(AvailabilityData i: list){
-            metric.addData(i);
-        }        
 
-        getUninterruptibly(dataAccess.insertData(metric, 360));
-        
-        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric, start.getMillis(),now().getMillis(), true));       
-
-        assertEquals(actual, list, "The availability data does not match the expected values");
-    }
-    
-    
     @Test
-    public void findAllGaugeWithOneBucket() throws Exception{
+    public void insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets() throws Exception {
+        DateTime start = now().minusMonths(2);
+
+        Availability metric = new Availability("avail-test", new MetricId("m1"));
+        List<AvailabilityData> list = generateTestAvailabilityDESC(3, start);
+        for (AvailabilityData i : list) {
+            metric.addData(i);
+        }
+
+        getUninterruptibly(dataAccess.insertData(metric, 360));
+
+        List<AvailabilityData> actual = sortAvailabilityDataWithWriteTime(dataAccess.findData(metric,
+                start.getMillis(), now().getMillis(), true));
+
+        assertEquals(actual, list, "The availability data does not match the expected values");
+    }
+
+    @Test
+    public void findAllGaugeWithOneBucket() throws Exception {
         DateTime start = now().minusMinutes(10);
-        
+
         Gauge metric1 = new Gauge("tenant-1", new MetricId("metric-1"));
         Gauge metric2 = new Gauge("tenant-1", new MetricId("metric-2"));
-        
-        List<GaugeData> list = generateTestGuageDESC(1,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(1, start);
+        for (GaugeData i : list) {
             metric1.addData(i);
-        }    
-        
-        for(GaugeData i : list){
+        }
+
+        for (GaugeData i : list) {
             metric2.addData(i);
         }
-        
+
         getUninterruptibly(dataAccess.insertData(metric1, MetricsServiceCassandra.DEFAULT_TTL));
         getUninterruptibly(dataAccess.insertData(metric2, MetricsServiceCassandra.DEFAULT_TTL));
-        
+
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
-        
+
         ListenableFuture<List<Gauge>> dataFuture = Futures
                 .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
         List<Gauge> metricList = getUninterruptibly(dataFuture);
-        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 is missing");
-        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-2 is missing");
-        
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"), start.getMillis() / timeSpan)),
+                "metric-1 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"), start.getMillis() / timeSpan)),
+                "metric-2 is missing");
+
     }
-    
+
     @Test
-    public void findAllGuageMeytricsWithTwoBuckets() throws Exception{
+    public void findAllGuageMeytricsWithTwoBuckets() throws Exception {
         DateTime start = now().minusMonths(1);
-        
+
         Gauge metric1 = new Gauge("tenant-1", new MetricId("metric-1"));
         Gauge metric2 = new Gauge("tenant-1", new MetricId("metric-2"));
-        
-        List<GaugeData> list = generateTestGuageDESC(2,start);
-        for(GaugeData i : list){
+
+        List<GaugeData> list = generateTestGuageDESC(2, start);
+        for (GaugeData i : list) {
             metric1.addData(i);
-        }    
-        
-        for(GaugeData i : list){
+        }
+
+        for (GaugeData i : list) {
             metric2.addData(i);
         }
-        
+
         getUninterruptibly(dataAccess.insertData(metric1, MetricsServiceCassandra.DEFAULT_TTL));
         getUninterruptibly(dataAccess.insertData(metric2, MetricsServiceCassandra.DEFAULT_TTL));
-        
+
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
-        
+
         ListenableFuture<List<Gauge>> dataFuture = Futures
                 .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
         List<Gauge> metricList = getUninterruptibly(dataFuture);
-        
-        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
-        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.plusWeeks(3).getMillis()/timeSpan)), "metric-2 with dpart-2 is missing");
-        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
-        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.plusWeeks(3).getMillis()/timeSpan)), "metric-2 with dpart-2 is missing");
+
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"), start.getMillis() / timeSpan)),
+                "metric-1 with dpart-1 is missing");
+        assertTrue(
+                metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"), start.plusWeeks(3).getMillis()
+                        / timeSpan)), "metric-2 with dpart-2 is missing");
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"), start.getMillis() / timeSpan)),
+                "metric-1 with dpart-1 is missing");
+        assertTrue(
+                metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"), start.plusWeeks(3).getMillis()
+                        / timeSpan)), "metric-2 with dpart-2 is missing");
     }
-        
-    
+
     @Test
     public void deleteGuageMetrics() throws Exception {
-        DateTime start = now().minusMinutes(10);  
-        
-        Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));     
-        
-        List<GaugeData> list = generateTestGuageDESC(1,start);
-        for(GaugeData i : list)
+        DateTime start = now().minusMinutes(10);
+
+        Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
+
+        List<GaugeData> list = generateTestGuageDESC(1, start);
+        for (GaugeData i : list)
         {
-            metric.addData(i);            
-        }    
-        
-             
+            metric.addData(i);
+        }
+
         getUninterruptibly(dataAccess.insertData(metric, MetricsServiceCassandra.DEFAULT_TTL));
-       
+
         ResultSetFuture queryFuture = dataAccess.findAllGuageMetrics();
-        
+
         ListenableFuture<List<Gauge>> dataFuture = Futures
                 .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
         List<Gauge> metricList = getUninterruptibly(dataFuture);
-        
-        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"),start.getMillis()/timeSpan)), "metric-1 with dpart-1 is missing");
-        
-        dataAccess.deleteGuageMetric("tenant-1","metric-1",metric.getId().getInterval(), start.getMillis()/timeSpan);
-        
-        
+
+        assertTrue(metricList.contains(new Gauge("tenant-1", new MetricId("metric-1"), start.getMillis() / timeSpan)),
+                "metric-1 with dpart-1 is missing");
+
+        dataAccess.deleteGuageMetric("tenant-1", "metric-1", metric.getId().getInterval(), start.getMillis()
+                / timeSpan);
+
         queryFuture = dataAccess.findAllGuageMetrics();
         dataFuture = Futures
                 .transform(queryFuture, Functions.MAP_GAUGE_METRIC);
         metricList = getUninterruptibly(dataFuture);
-        assertTrue(metricList.isEmpty(),"records have not been deleted"); 
+        assertTrue(metricList.isEmpty(), "records have not been deleted");
     }
-       
-    private List<GaugeData> generateTestGaugeASC(int numBuckets, DateTime time){
+
+    private List<GaugeData> generateTestGaugeASC(int numBuckets, DateTime time) {
         ArrayList<GaugeData> list = new ArrayList<GaugeData>();
         DateTime dataPoint = time;
-        
-        for(int i=0;i<numBuckets;i++){
-            list.add(new GaugeData(dataPoint.getMillis(),i));
-            list.add(new GaugeData(dataPoint.plusMinutes(1).getMillis(),i+3));
-            list.add(new GaugeData(dataPoint.plusMinutes(2).getMillis(),i+4));
+
+        for (int i = 0; i < numBuckets; i++) {
+            list.add(new GaugeData(dataPoint.getMillis(), i));
+            list.add(new GaugeData(dataPoint.plusMinutes(1).getMillis(), i + 3));
+            list.add(new GaugeData(dataPoint.plusMinutes(2).getMillis(), i + 4));
             dataPoint = dataPoint.plusWeeks(3);
         }
-        
+
         return list;
     }
-    
-    private List<GaugeData> generateTestGuageDESC(int numBuckets, DateTime time){
+
+    private List<GaugeData> generateTestGuageDESC(int numBuckets, DateTime time) {
         ArrayList<GaugeData> list = new ArrayList<GaugeData>();
-        DateTime dataPoint = time.plusWeeks(3*(numBuckets-1));
-        for(int i=0;i<numBuckets;i++){
-            list.add(new GaugeData(dataPoint.plusMinutes(2).getMillis(),i+4));
-            list.add(new GaugeData(dataPoint.plusMinutes(1).getMillis(),i+3));
-            list.add(new GaugeData(dataPoint.getMillis(),i));
-            dataPoint= dataPoint.minusWeeks(3);
+        DateTime dataPoint = time.plusWeeks(3 * (numBuckets - 1));
+        for (int i = 0; i < numBuckets; i++) {
+            list.add(new GaugeData(dataPoint.plusMinutes(2).getMillis(), i + 4));
+            list.add(new GaugeData(dataPoint.plusMinutes(1).getMillis(), i + 3));
+            list.add(new GaugeData(dataPoint.getMillis(), i));
+            dataPoint = dataPoint.minusWeeks(3);
         }
         return list;
     }
-    
-    private List<AvailabilityData> generateTestAvailabilityDESC(int numBuckets, DateTime time){
+
+    private List<AvailabilityData> generateTestAvailabilityDESC(int numBuckets, DateTime time) {
         ArrayList<AvailabilityData> list = new ArrayList<AvailabilityData>();
-        DateTime dataPoint = time.plusWeeks(3*(numBuckets-1));
-        for(int i=0;i<numBuckets;i++){
-            list.add(new AvailabilityData(dataPoint.plusMinutes(2).getMillis(),"unknown"));
-            list.add(new AvailabilityData(dataPoint.plusMinutes(1).getMillis(),"down"));
-            list.add(new AvailabilityData(dataPoint.getMillis(),"up"));
-            dataPoint= dataPoint.minusWeeks(3);
+        DateTime dataPoint = time.plusWeeks(3 * (numBuckets - 1));
+        for (int i = 0; i < numBuckets; i++) {
+            list.add(new AvailabilityData(dataPoint.plusMinutes(2).getMillis(), "unknown"));
+            list.add(new AvailabilityData(dataPoint.plusMinutes(1).getMillis(), "down"));
+            list.add(new AvailabilityData(dataPoint.getMillis(), "up"));
+            dataPoint = dataPoint.minusWeeks(3);
         }
         return list;
     }
-    
-    private List<AvailabilityData> generateTestAvailabilityASC(int numBuckets, DateTime time){
+
+    private List<AvailabilityData> generateTestAvailabilityASC(int numBuckets, DateTime time) {
         ArrayList<AvailabilityData> list = new ArrayList<AvailabilityData>();
         DateTime dataPoint = time;
-        
-        for(int i=0;i<numBuckets;i++){
-            list.add(new AvailabilityData(dataPoint.getMillis(),"up"));
-            list.add(new AvailabilityData(dataPoint.plusMinutes(1).getMillis(),"down"));
-            list.add(new AvailabilityData(dataPoint.plusMinutes(2).getMillis(),"unknown"));
+
+        for (int i = 0; i < numBuckets; i++) {
+            list.add(new AvailabilityData(dataPoint.getMillis(), "up"));
+            list.add(new AvailabilityData(dataPoint.plusMinutes(1).getMillis(), "down"));
+            list.add(new AvailabilityData(dataPoint.plusMinutes(2).getMillis(), "unknown"));
             dataPoint = dataPoint.plusWeeks(3);
         }
-        
+
         return list;
     }
-    
-    private List<GaugeData> sortGaugeData(List<ResultSetFuture> queryFuture) throws Exception{
+
+    private List<GaugeData> sortGaugeData(List<ResultSetFuture> queryFuture) throws Exception {
         List<GaugeData> result = new ArrayList<GaugeData>();
-        for(ResultSetFuture i: queryFuture){
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA);
-        result.addAll(getUninterruptibly(dataFuture));
+        for (ResultSetFuture i : queryFuture) {
+            ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA);
+            result.addAll(getUninterruptibly(dataFuture));
         }
         return result;
     }
-    
-    private List<AvailabilityData> sortAvailabilityData(List<ResultSetFuture> queryFuture) throws Exception{
+
+    private List<AvailabilityData> sortAvailabilityData(List<ResultSetFuture> queryFuture) throws Exception {
         List<AvailabilityData> result = new ArrayList<AvailabilityData>();
-        for(ResultSetFuture i: queryFuture){
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures.transform(i, Functions.MAP_AVAILABILITY_DATA);
-        result.addAll(getUninterruptibly(dataFuture));
+        for (ResultSetFuture i : queryFuture) {
+            ListenableFuture<List<AvailabilityData>> dataFuture = Futures
+                    .transform(i, Functions.MAP_AVAILABILITY_DATA);
+            result.addAll(getUninterruptibly(dataFuture));
         }
         return result;
     }
-    
-    private List<GaugeData> sortGaugeDataWithWriteTime(List<ResultSetFuture> queryFuture) throws Exception{
+
+    private List<GaugeData> sortGaugeDataWithWriteTime(List<ResultSetFuture> queryFuture) throws Exception {
         List<GaugeData> result = new ArrayList<GaugeData>();
-        for(ResultSetFuture i: queryFuture){
-        ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i, Functions.MAP_GAUGE_DATA_WITH_WRITE_TIME);
-        result.addAll(getUninterruptibly(dataFuture));
+        for (ResultSetFuture i : queryFuture) {
+            ListenableFuture<List<GaugeData>> dataFuture = Futures.transform(i,
+                    Functions.MAP_GAUGE_DATA_WITH_WRITE_TIME);
+            result.addAll(getUninterruptibly(dataFuture));
         }
         return result;
     }
-    
-    private List<AvailabilityData> sortAvailabilityDataWithWriteTime(List<ResultSetFuture> queryFuture) throws Exception{
+
+    private List<AvailabilityData> sortAvailabilityDataWithWriteTime(List<ResultSetFuture> queryFuture)
+            throws Exception {
         List<AvailabilityData> result = new ArrayList<AvailabilityData>();
-        for(ResultSetFuture i: queryFuture){
-        ListenableFuture<List<AvailabilityData>> dataFuture = Futures.transform(i, Functions.MAP_AVAILABILITY_WITH_WRITE_TIME);
-        result.addAll(getUninterruptibly(dataFuture));
+        for (ResultSetFuture i : queryFuture) {
+            ListenableFuture<List<AvailabilityData>> dataFuture = Futures.transform(i,
+                    Functions.MAP_AVAILABILITY_WITH_WRITE_TIME);
+            result.addAll(getUninterruptibly(dataFuture));
         }
         return result;
     }

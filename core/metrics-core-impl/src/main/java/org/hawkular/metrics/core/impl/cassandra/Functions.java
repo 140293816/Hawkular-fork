@@ -22,6 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
+import org.hawkular.metrics.core.api.AggregationTemplate;
+import org.hawkular.metrics.core.api.AvailabilityData;
+import org.hawkular.metrics.core.api.Gauge;
+import org.hawkular.metrics.core.api.GaugeData;
+import org.hawkular.metrics.core.api.Interval;
+import org.hawkular.metrics.core.api.MetricId;
+import org.hawkular.metrics.core.api.MetricType;
+import org.hawkular.metrics.core.api.Tenant;
+
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
@@ -30,15 +39,6 @@ import com.datastax.driver.core.UDTValue;
 import com.google.common.base.Function;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import org.hawkular.metrics.core.api.AggregationTemplate;
-import org.hawkular.metrics.core.api.AvailabilityData;
-import org.hawkular.metrics.core.api.Gauge;
-import org.hawkular.metrics.core.api.Interval;
-import org.hawkular.metrics.core.api.MetricId;
-import org.hawkular.metrics.core.api.MetricType;
-import org.hawkular.metrics.core.api.GaugeData;
-import org.hawkular.metrics.core.api.Tenant;
 
 /**
  * @author jsanda
@@ -62,8 +62,8 @@ public class Functions {
         TAGS,
         WRITE_TIME
     }
-    
-    private static enum GAUGE_ALL_COLS{
+
+    private static enum GAUGE_ALL_COLS {
         TENANT_ID,
         METRIC,
         INTERVAL,
@@ -73,18 +73,18 @@ public class Functions {
         DATA_RETENTION,
         VALUE,
         TAGS
-      
+
     }
-    
-    private static enum GAUGE_METRIC{
-      TENANT_ID,
-      TYPE,
-      METRIC,
-      INTERVAL,
-      DPART
+
+    private static enum GAUGE_METRIC {
+        TENANT_ID,
+        TYPE,
+        METRIC,
+        INTERVAL,
+        DPART
     }
-    
-    private static enum TAG{
+
+    private static enum TAG {
         TAGS
     }
 
@@ -92,50 +92,48 @@ public class Functions {
     }
 
     public static final Function<List<ResultSet>, Void> TO_VOID = resultSets -> null;
-    
+
     public static final Function<ResultSet, List<Map>> MAP_TAGS = resultSet ->
-    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getTags).collect(toList());
-    
-    public static Map getTags(Row row){
+            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getTags).collect(toList());
+
+    public static Map getTags(Row row) {
         return row.getMap(TAG.TAGS.ordinal(), String.class, String.class);
     }
-    
+
     public static final Function<ResultSet, List<Gauge>> MAP_GAUGE_METRIC = resultSet ->
-    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeMetric).collect(toList());
-    
-    public static Gauge getGaugeMetric(Row row){
+            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeMetric).collect(toList());
+
+    public static Gauge getGaugeMetric(Row row) {
         return new Gauge(
                 row.getString(GAUGE_METRIC.TENANT_ID.ordinal()),
                 new MetricId(row.getString(GAUGE_METRIC.METRIC.ordinal())),
                 row.getLong(GAUGE_METRIC.DPART.ordinal())
-                
+
         );
     }
-    
+
     public static final Function<ResultSet, List<GaugeData>> MAP_GAUGE_DATA_WITH_SAME_TIMESTAMP = resultSet ->
-            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeDataWithSameTimestamp).collect(toList());
-    
+    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeDataWithSameTimestamp)
+                    .collect(toList());
+
     private static GaugeData getGaugeDataWithSameTimestamp(Row row) {
         return new GaugeData(
                 row.getUUID(GAUGE_ALL_COLS.TIME.ordinal()), row.getDouble(GAUGE_ALL_COLS.VALUE.ordinal()),
-                row.getMap(GAUGE_ALL_COLS.TAGS.ordinal(), String.class, String.class)
-        );
+                row.getMap(GAUGE_ALL_COLS.TAGS.ordinal(), String.class, String.class));
     }
 
-
     public static final Function<ResultSet, List<GaugeData>> MAP_GAUGE_DATA = resultSet ->
-            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeData).collect(toList());
+    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeData).collect(toList());
 
     private static GaugeData getGaugeData(Row row) {
         return new GaugeData(
                 row.getUUID(GAUGE_COLS.TIME.ordinal()), row.getDouble(GAUGE_COLS.VALUE.ordinal()),
-                row.getMap(GAUGE_COLS.TAGS.ordinal(), String.class, String.class)
-        );
+                row.getMap(GAUGE_COLS.TAGS.ordinal(), String.class, String.class));
     }
 
     public static final Function<ResultSet, List<GaugeData>> MAP_GAUGE_DATA_WITH_WRITE_TIME = resultSet ->
-        StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeDataAndWriteTime)
-                .collect(toList());
+            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getGaugeDataAndWriteTime)
+                    .collect(toList());
 
     private static GaugeData getGaugeDataAndWriteTime(Row row) {
         return new GaugeData(
@@ -146,7 +144,7 @@ public class Functions {
     }
 
     public static final Function<ResultSet, List<AvailabilityData>> MAP_AVAILABILITY_DATA = resultSet ->
-            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getAvailability).collect(toList());
+    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getAvailability).collect(toList());
 
     private static AvailabilityData getAvailability(Row row) {
         return new AvailabilityData(
@@ -155,24 +153,23 @@ public class Functions {
     }
 
     public static final Function<ResultSet, List<AvailabilityData>> MAP_AVAILABILITY_WITH_WRITE_TIME = resultSet ->
-            StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getAvailabilityAndWriteTime)
-                    .collect(toList());
+    StreamSupport.stream(resultSet.spliterator(), false).map(Functions::getAvailabilityAndWriteTime)
+    .collect(toList());
 
     private static AvailabilityData getAvailabilityAndWriteTime(Row row) {
         return new AvailabilityData(
                 row.getUUID(AVAILABILITY_COLS.TIME.ordinal()),
                 row.getBytes(AVAILABILITY_COLS.AVAILABILITY.ordinal()),
                 row.getMap(AVAILABILITY_COLS.TAGS.ordinal(), String.class, String.class),
-                row.getLong(AVAILABILITY_COLS.WRITE_TIME.ordinal()) / 1000
-        );
+                row.getLong(AVAILABILITY_COLS.WRITE_TIME.ordinal()) / 1000);
     }
 
     public static ListenableFuture<Tenant> getTenant(ResultSetFuture future) {
         return Futures.transform(future, (ResultSet resultSet) ->
-                        StreamSupport.stream(resultSet.spliterator(), false)
-                                .findFirst().map(Functions::getTenant)
-                                .orElse(null)
-        );
+                StreamSupport.stream(resultSet.spliterator(), false)
+                        .findFirst().map(Functions::getTenant)
+                        .orElse(null)
+                );
     }
 
     private static Tenant getTenant(Row row) {
@@ -191,9 +188,9 @@ public class Functions {
         List<UDTValue> templateValues = row.getList(2, UDTValue.class);
         for (UDTValue value : templateValues) {
             tenant.addAggregationTemplate(new AggregationTemplate()
-                    .setType(MetricType.fromCode(value.getInt("type")))
-                    .setInterval(Interval.parse(value.getString("interval")))
-                    .setFunctions(value.getSet("fns", String.class)));
+            .setType(MetricType.fromCode(value.getInt("type")))
+            .setInterval(Interval.parse(value.getString("interval")))
+            .setFunctions(value.getSet("fns", String.class)));
         }
 
         return tenant;
