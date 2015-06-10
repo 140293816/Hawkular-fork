@@ -19,16 +19,16 @@ public class Consumer {
                 .build();
         reporter.start(1, TimeUnit.MINUTES);
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(1);
-        executorService.submit(new RunnableWriter(5, meter));
+        final ExecutorService executorService = Executors.newFixedThreadPool(10);
+//        executorService.submit(new RunnableWriter(5, meter));
         
-//        for(int i=0; i< 5; i++){
-//            executorService.submit(new RunnableWriter(5, meter));
-//        }
+        for(int i=0; i< 10; i++){
+            executorService.submit(new RunnableWriter(i, meter));
+        }
 
         executorService.shutdown();
         executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
-        Generator.close();
+        Generator0.close();
 
         reporter.report();
         reporter.stop();

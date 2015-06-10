@@ -17,13 +17,13 @@ import com.datastax.driver.core.Session;
 
 public class Generator0 {
     private Meter meter;
-    private  final Cluster cluster;
-    private  final Session session;
-    private  final Random ran = new Random();
-    private  final long TIMESPAN = 1814400000L;
+    private static final Cluster cluster;
+    private static final Session session;
+    private static final Random ran = new Random();
+    private static final long TIMESPAN = 1814400000L;
     private int num;
 
-     {
+     static {
         cluster = new Cluster.Builder()
                 .addContactPoint("127.0.0.1")
                 .build();
@@ -42,7 +42,7 @@ public class Generator0 {
         session.execute("TRUNCATE data");
     }
 
-    private  final PreparedStatement insertPS = session
+    private static final PreparedStatement insertPS = session
             .prepare(
                     "INSERT INTO data (tenant_id, type, metric, interval, dpart, time, n_value) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
@@ -55,7 +55,7 @@ public class Generator0 {
         DateTime dataPoint;
         GaugeData data;
             dataPoint = now().minusWeeks(3 * num);
-                for (int i = 0; i < 1000000; i++) {
+                for (int i = 0; i < 10000000; i++) {
                     data = new GaugeData(dataPoint.getMillis(),
                             ran.nextDouble());
                     session.executeAsync(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", " ",
@@ -65,7 +65,7 @@ public class Generator0 {
                 }
         }
 
-    public  void close() {
+    public static void close() {
         session.close();
         cluster.close();
     }
