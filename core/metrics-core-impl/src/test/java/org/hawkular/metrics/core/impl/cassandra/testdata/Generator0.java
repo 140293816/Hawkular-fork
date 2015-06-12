@@ -55,10 +55,10 @@ public class Generator0 {
         DateTime dataPoint;
         GaugeData data;
             dataPoint = now().minusWeeks(3 * num);
-                for (int i = 0; i < 10000000; i++) {
+                for (int i = 0; i < 25000000; i++) {
                     data = new GaugeData(dataPoint.getMillis(),
                             ran.nextDouble());
-                    session.executeAsync(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", " ",
+                    session.executeAsync(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", "",
                             data.getTimestamp() / TIMESPAN, data.getTimeUUID(), data.getValue()));
                     meter.mark();
                     dataPoint = dataPoint.minusMillis(1);

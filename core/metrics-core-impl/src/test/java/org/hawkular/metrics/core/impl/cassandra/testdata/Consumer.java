@@ -19,10 +19,10 @@ public class Consumer {
                 .build();
         reporter.start(1, TimeUnit.MINUTES);
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(10);
+        final ExecutorService executorService = Executors.newFixedThreadPool(4);
 //        executorService.submit(new RunnableWriter(5, meter));
         
-        for(int i=0; i< 10; i++){
+        for(int i=0; i< 4; i++){
             executorService.submit(new RunnableWriter(i, meter));
         }
 

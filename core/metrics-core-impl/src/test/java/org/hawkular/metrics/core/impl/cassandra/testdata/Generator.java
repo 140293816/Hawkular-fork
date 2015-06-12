@@ -58,12 +58,12 @@ public class Generator {
         GaugeData data;
         for (int z = 0; z < num; z++) {
             dataPoint = now().minusWeeks(3 * z);
-            for (int j = 0; j < 305; j++) {
+            for (int j = 0; j < 30; j++) {
                 final BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
                 for (int i = 0; i < RANGE; i++) {
                     data = new GaugeData(dataPoint.getMillis(),
                             ran.nextDouble());
-                    batchStatement.add(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", " ",
+                    batchStatement.add(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", "",
                             data.getTimestamp() / TIMESPAN, data.getTimeUUID(), data.getValue()));
                     meter.mark();
                     dataPoint = dataPoint.minusMillis(1);
