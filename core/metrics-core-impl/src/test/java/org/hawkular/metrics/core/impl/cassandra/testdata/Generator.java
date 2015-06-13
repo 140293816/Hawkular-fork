@@ -21,7 +21,7 @@ public class Generator {
     private static final Cluster cluster;
     private static final Session session;
     private static final Random ran = new Random();
-    private static final int RANGE = 65535;
+    private static final int RANGE = 50000;
     private static final long TIMESPAN = 1814400000L;
     private int num;
 
@@ -58,7 +58,7 @@ public class Generator {
         GaugeData data;
         for (int z = 0; z < num; z++) {
             dataPoint = now().minusWeeks(3 * z);
-            for (int j = 0; j < 30; j++) {
+            for (int j = 0; j < 500; j++) {
                 final BatchStatement batchStatement = new BatchStatement(BatchStatement.Type.UNLOGGED);
                 for (int i = 0; i < RANGE; i++) {
                     data = new GaugeData(dataPoint.getMillis(),
