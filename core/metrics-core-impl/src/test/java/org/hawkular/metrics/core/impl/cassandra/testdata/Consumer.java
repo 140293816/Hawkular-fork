@@ -26,7 +26,7 @@ public class Consumer {
 
         executorService.shutdown();
         executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
-        Generator0.close();
+        Generator.close();
 
         reporter.report();
         reporter.stop();

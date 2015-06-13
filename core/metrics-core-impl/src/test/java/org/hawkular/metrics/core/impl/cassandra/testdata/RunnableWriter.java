@@ -3,10 +3,10 @@ package org.hawkular.metrics.core.impl.cassandra.testdata;
 import com.codahale.metrics.Meter;
 
 public class RunnableWriter implements Runnable {
-    private Generator0 generator;
+    private Generator generator;
 
     public RunnableWriter(int num, Meter meter) {
-        generator = new Generator0(num, meter);
+        generator = new Generator(num, meter);
     }
 
     @Override
