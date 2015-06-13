@@ -16,14 +16,11 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
 public class Generator {
-    private Meter meter;
     private static final Cluster cluster;
     private static final Session session;
     private static final Random ran = new Random();
     private static final long TIMESPAN = 1814400000L;
-    private int num;
-
-     static {
+    static {
         cluster = new Cluster.Builder()
                 .addContactPoint("127.0.0.1")
                 .build();
@@ -41,10 +38,18 @@ public class Generator {
 
         session.execute("TRUNCATE data");
     }
-
     private static final PreparedStatement insertPS = session
             .prepare(
-                    "INSERT INTO data (tenant_id, type, metric, interval, dpart, time, n_value) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            "INSERT INTO data (tenant_id, type, metric, interval, dpart, time, n_value) VALUES (?, ?, ?, ?, ?, ?, ?)");
+
+    public static void close() {
+        session.close();
+        cluster.close();
+    }
+
+    private Meter meter;
+
+    private int num;
 
     public Generator(int num, Meter meter) {
         this.num = num;
@@ -54,20 +59,15 @@ public class Generator {
     public void insertData() {
         DateTime dataPoint;
         GaugeData data;
-            dataPoint = now().minusWeeks(3 * num);
-                for (int i = 0; i < 25000000; i++) {
-                    data = new GaugeData(dataPoint.getMillis(),
-                            ran.nextDouble());
-                    session.executeAsync(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", "",
-                            data.getTimestamp() / TIMESPAN, data.getTimeUUID(), data.getValue()));
-                    meter.mark();
-                    dataPoint = dataPoint.minusMillis(1);
-                }
+        dataPoint = now().minusWeeks(3 * num);
+        for (int i = 0; i < 35000000; i++) {
+            data = new GaugeData(dataPoint.getMillis(),
+                    ran.nextDouble());
+            session.executeAsync(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", "",
+                    data.getTimestamp() / TIMESPAN, data.getTimeUUID(), data.getValue()));
+            meter.mark();
+            dataPoint = dataPoint.minusMillis(1);
         }
-
-    public static void close() {
-        session.close();
-        cluster.close();
     }
 
 }

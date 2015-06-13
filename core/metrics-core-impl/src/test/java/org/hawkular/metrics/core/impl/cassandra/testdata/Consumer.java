@@ -9,8 +9,8 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 
 public class Consumer {
-    public static void GenerateData(int num) throws InterruptedException  {
-
+    public static void main(String[] args) throws InterruptedException {
+        int num = Integer.valueOf(args[0]);
         final MetricRegistry metricRegistry = new MetricRegistry();
         final Meter meter = metricRegistry.meter("throughput");
         final ConsoleReporter reporter = ConsoleReporter.forRegistry(metricRegistry)
@@ -19,8 +19,8 @@ public class Consumer {
                 .build();
         reporter.start(1, TimeUnit.MINUTES);
 
-        final ExecutorService executorService = Executors.newFixedThreadPool(4);
-        for(int i=0; i< num; i++){
+        final ExecutorService executorService = Executors.newFixedThreadPool(3);
+        for (int i = 0; i < num; i++) {
             executorService.submit(new RunnableWriter(i, meter));
         }
 

@@ -24,12 +24,11 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
 public class FindData {
-    private final Cluster cluster;
-    private final Session session;
-    private DataAccessImpl dataAccess;
-    private int num;
+    private static final Cluster cluster;
+    private static DataAccessImpl dataAccess;
+    private static final Session session;
 
-    {
+    static {
         cluster = new Cluster.Builder()
                 .addContactPoint("127.0.0.1")
                 .build();
@@ -37,12 +36,8 @@ public class FindData {
         dataAccess = new DataAccessImpl(session);
     }
 
-    public FindData(int num){
-        this.num =num;
-    }
-    
-    public void generateReport() throws InterruptedException, ExecutionException {
-
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        int num = Integer.valueOf(args[0]);
         final MetricRegistry metricRegistry = new MetricRegistry();
 
         final CsvReporter reporter = CsvReporter.forRegistry(metricRegistry)
@@ -78,16 +73,11 @@ public class FindData {
         reporter.stop();
     }
 
-    private void test(ResultSetFuture result, Timer timer) throws InterruptedException, ExecutionException {
+    private static void test(ResultSetFuture result, Timer timer) throws InterruptedException, ExecutionException {
         Context context = timer.time();
-        for(Iterator<Row> i = result.get().iterator();i.hasNext();i.next()){
+        for (Iterator<Row> i = result.get().iterator(); i.hasNext(); i.next()) {
             context.stop();
         }
-    }
-    
-    public static void main(String[] args) throws InterruptedException, ExecutionException{
-        FindData t =new FindData(3);
-        t.generateReport();
     }
 
 }
