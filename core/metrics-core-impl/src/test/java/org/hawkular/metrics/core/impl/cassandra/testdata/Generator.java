@@ -16,15 +16,16 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
 public class Generator {
+    private Meter meter;
     private static final Cluster cluster;
     private static final Session session;
     private static final Random ran = new Random();
     private static final long TIMESPAN = 1814400000L;
+    private int num;
     static {
         cluster = new Cluster.Builder()
-                .addContactPoint("127.0.0.1")
-                .build();
-
+        .addContactPoint("127.0.0.1")
+        .build();
         final Session bootstrapSession = cluster.connect();
         SchemaManager report = new SchemaManager(bootstrapSession);
         try {
@@ -33,23 +34,12 @@ public class Generator {
             e.printStackTrace();
         }
         bootstrapSession.close();
-
         session = cluster.connect("report");
-
         session.execute("TRUNCATE data");
     }
     private static final PreparedStatement insertPS = session
             .prepare(
-            "INSERT INTO data (tenant_id, type, metric, interval, dpart, time, n_value) VALUES (?, ?, ?, ?, ?, ?, ?)");
-
-    public static void close() {
-        session.close();
-        cluster.close();
-    }
-
-    private Meter meter;
-
-    private int num;
+                    "INSERT INTO data (tenant_id, type, metric, interval, dpart, time, n_value) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     public Generator(int num, Meter meter) {
         this.num = num;
@@ -60,7 +50,7 @@ public class Generator {
         DateTime dataPoint;
         GaugeData data;
         dataPoint = now().minusWeeks(3 * num);
-        for (int i = 0; i < 35000000; i++) {
+        for (int i = 0; i < 25000000; i++) {
             data = new GaugeData(dataPoint.getMillis(),
                     ran.nextDouble());
             session.executeAsync(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", "",
@@ -70,4 +60,8 @@ public class Generator {
         }
     }
 
+    public static void close() {
+        session.close();
+        cluster.close();
+    }
 }

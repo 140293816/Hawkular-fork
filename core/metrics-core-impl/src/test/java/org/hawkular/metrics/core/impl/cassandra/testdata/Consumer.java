@@ -18,18 +18,14 @@ public class Consumer {
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
                 .build();
         reporter.start(1, TimeUnit.MINUTES);
-
-        final ExecutorService executorService = Executors.newFixedThreadPool(3);
+        final ExecutorService executorService = Executors.newFixedThreadPool(8);
         for (int i = 0; i < num; i++) {
             executorService.submit(new RunnableWriter(i, meter));
         }
-
         executorService.shutdown();
         executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
         Generator.close();
-
         reporter.report();
         reporter.stop();
     }
-
 }
