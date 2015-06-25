@@ -15,12 +15,11 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.Session;
 
-public class Generator {
+public class Generator0 {
     private Meter meter;
     private static final Cluster cluster;
     private static final Session session;
     private static final Random ran = new Random();
-    private static final long TIMESPAN = 1814400000L;
     private int num;
     static {
         cluster = new Cluster.Builder()
@@ -29,19 +28,19 @@ public class Generator {
         final Session bootstrapSession = cluster.connect();
         SchemaManager report = new SchemaManager(bootstrapSession);
         try {
-            report.createSchema("report");
+            report.createSchema("original");
         } catch (IOException e) {
             e.printStackTrace();
         }
         bootstrapSession.close();
-        session = cluster.connect("report");
+        session = cluster.connect("original");
         session.execute("TRUNCATE data");
     }
     private static final PreparedStatement insertPS = session
             .prepare(
             "INSERT INTO data (tenant_id, type, metric, interval, dpart, time, n_value) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
-    public Generator(int num, Meter meter) {
+    public Generator0(int num, Meter meter) {
         this.num = num;
         this.meter = meter;
     }
@@ -54,7 +53,7 @@ public class Generator {
             data = new GaugeData(dataPoint.getMillis(),
                     ran.nextDouble());
             session.executeAsync(new BoundStatement(insertPS).bind("tenant-1", 0, "metric-1", "",
-                    data.getTimestamp() / TIMESPAN, data.getTimeUUID(), data.getValue()));
+                    0L, data.getTimeUUID(), data.getValue()));
             meter.mark();
             dataPoint = dataPoint.minusMillis(1);
         }

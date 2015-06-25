@@ -4,14 +4,12 @@ import static org.joda.time.DateTime.now;
 
 import java.io.File;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.hawkular.metrics.core.api.Gauge;
 import org.hawkular.metrics.core.api.MetricId;
-import org.hawkular.metrics.core.impl.cassandra.DataAccessImpl2;
+import org.hawkular.metrics.core.impl.cassandra.DataAccessImpl1;
 import org.hawkular.metrics.core.impl.cassandra.Order;
 import org.joda.time.DateTime;
 
@@ -24,26 +22,26 @@ import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 
-public class FindData2 {
+public class FindData1 {
     private static final Cluster cluster;
     private static final Session session;
-    private static final DataAccessImpl2 dataAccess;
+    private static final DataAccessImpl1 dataAccess;
     static {
         cluster = new Cluster.Builder()
-        .addContactPoint("127.0.0.1")
-        .build();
+                .addContactPoint("127.0.0.1")
+                .build();
         session = cluster.connect("report");
-        dataAccess = new DataAccessImpl2(session);
+        dataAccess = new DataAccessImpl1(session);
     }
 
-    public static void main(String[] args) throws InterruptedException, ExecutionException {
+    public static void main(String[] args) {
         int num = Integer.valueOf(args[0]);
         final MetricRegistry metricRegistry = new MetricRegistry();
         final CsvReporter reporter = CsvReporter.forRegistry(metricRegistry)
                 .formatFor(Locale.US)
                 .convertRatesTo(TimeUnit.SECONDS)
                 .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .build(new File("/home/ubuntu/test_results/2"));
+                .build(new File("/home/ubuntu/test_results/1"));
         reporter.start(1, TimeUnit.MINUTES);
         Gauge metric = new Gauge("tenant-1", new MetricId("metric-1"));
         DateTime date = now().minusWeeks(1);
@@ -54,8 +52,8 @@ public class FindData2 {
                     now().getMillis(), true), metricRegistry.timer("find_data_with_writetime_" + i));
             test(dataAccess.findData(metric, date.getMillis(), now().getMillis(), Order.DESC),
                     metricRegistry.timer("find_data_DESC_" + i));
-            test(dataAccess.findData(metric, date.getMillis(), now().getMillis(), Order.ASC),
-                    metricRegistry.timer("find_data_ASC_" + i));
+            //            test(dataAccess.findData(metric, date.getMillis(), now().getMillis(), Order.ASC),
+            //                    metricRegistry.timer("find_data_ASC_" + i));
             date = date.minusWeeks(3);
         }
         session.close();
@@ -64,12 +62,10 @@ public class FindData2 {
         reporter.stop();
     }
 
-    private static void test(List<ResultSetFuture> list, Timer timer) {
+    private static void test(ResultSetFuture result, Timer timer) {
         Context context = timer.time();
-        for (ResultSetFuture result : list) {
-            for (Iterator<Row> i = result.getUninterruptibly().iterator(); i.hasNext(); i.next()) {
-                context.stop();
-            }
+        for (Iterator<Row> i = result.getUninterruptibly().iterator(); i.hasNext(); i.next()) {
+            context.stop();
         }
     }
 

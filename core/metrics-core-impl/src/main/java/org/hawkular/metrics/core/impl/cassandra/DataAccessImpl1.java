@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,48 +59,89 @@ import com.datastax.driver.core.utils.UUIDs;
  *
  * @author John Sanda
  */
-public class DataAccessImpl implements DataAccess {
+public class DataAccessImpl1 implements DataAccess {
+
     private Session session;
+
     private PreparedStatement insertTenant;
+
     private PreparedStatement findAllTenantIds;
+
     private PreparedStatement findTenant;
+
     private PreparedStatement insertIntoMetricsIndex;
+
     private PreparedStatement findMetric;
+
     private PreparedStatement getMetricTags;
+
     private PreparedStatement addMetricTagsToDataTable;
+
     private PreparedStatement addMetadataAndDataRetention;
+
     private PreparedStatement deleteMetricTagsFromDataTable;
+
     private PreparedStatement insertGaugeData;
+
     private PreparedStatement findGaugeDataByDateRangeExclusive;
+
     private PreparedStatement findGaugeDataByDateRangeExclusiveASC;
+
     private PreparedStatement findGaugeDataWithWriteTimeByDateRangeExclusive;
+
     private PreparedStatement findGaugeDataByDateRangeInclusive;
+
     private PreparedStatement findGaugeDataWithWriteTimeByDateRangeInclusive;
+
     private PreparedStatement findAvailabilityByDateRangeInclusive;
+
     private PreparedStatement deleteGaugeMetric;
+
     private PreparedStatement findGaugeMetrics;
+
     private PreparedStatement updateCounter;
+
     private PreparedStatement findCountersByGroup;
+
     private PreparedStatement findCountersByGroupAndName;
+
     private PreparedStatement insertGaugeTags;
+
     private PreparedStatement insertAvailabilityTags;
+
     private PreparedStatement updateDataWithTags;
+
     private PreparedStatement findGaugeDataByTag;
+
     private PreparedStatement findAvailabilityByTag;
+
     private PreparedStatement insertAvailability;
+
     private PreparedStatement findAvailabilities;
+
     private PreparedStatement updateMetricsIndex;
+
     private PreparedStatement addTagsToMetricsIndex;
+
     private PreparedStatement deleteTagsFromMetricsIndex;
+
     private PreparedStatement readMetricsIndex;
+
     private PreparedStatement findAvailabilitiesWithWriteTime;
+
     private PreparedStatement updateRetentionsIndex;
+
     private PreparedStatement findDataRetentions;
+
     private PreparedStatement insertMetricsTagsIndex;
+
     private PreparedStatement deleteMetricsTagsIndex;
+
     private PreparedStatement findMetricsByTagName;
 
-    public DataAccessImpl(Session session) {
+    private static final long timeSpan = 1814400000L;
+
+    public DataAccessImpl1(Session session) {
         this.session = session;
         initPreparedStatements();
     }
@@ -110,141 +151,190 @@ public class DataAccessImpl implements DataAccess {
                 "INSERT INTO tenants (id, retentions, aggregation_templates) " +
                         "VALUES (?, ?, ?) " +
                         "IF NOT EXISTS");
+
         findAllTenantIds = session.prepare("SELECT DISTINCT id FROM tenants");
+
         findTenant = session.prepare("SELECT id, retentions, aggregation_templates FROM tenants WHERE id = ?");
+
         findMetric = session.prepare(
                 "SELECT tenant_id, type, metric, interval, dpart, m_tags, data_retention " +
                         "FROM data " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+
         getMetricTags = session.prepare(
                 "SELECT m_tags " +
                         "FROM data " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+
         addMetricTagsToDataTable = session.prepare(
                 "UPDATE data " +
                         "SET m_tags = m_tags + ? " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+
         addMetadataAndDataRetention = session.prepare(
                 "UPDATE data " +
                         "SET m_tags = m_tags + ?, data_retention = ? " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+
         deleteMetricTagsFromDataTable = session.prepare(
                 "UPDATE data " +
                         "SET m_tags = m_tags - ? " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+
         insertIntoMetricsIndex = session.prepare(
                 "INSERT INTO metrics_idx (tenant_id, type, interval, metric, data_retention, tags) " +
                         "VALUES (?, ?, ?, ?, ?, ?) " +
                         "IF NOT EXISTS");
+
         updateMetricsIndex = session.prepare(
                 "INSERT INTO metrics_idx (tenant_id, type, interval, metric) VALUES (?, ?, ?, ?)");
+
         addTagsToMetricsIndex = session.prepare(
                 "UPDATE metrics_idx " +
                         "SET tags = tags + ? " +
                         "WHERE tenant_id = ? AND type = ? AND interval = ? AND metric = ?");
+
         deleteTagsFromMetricsIndex = session.prepare(
                 "UPDATE metrics_idx " +
                         "SET tags = tags - ?" +
                         "WHERE tenant_id = ? AND type = ? AND interval = ? AND metric = ?");
+
         readMetricsIndex = session.prepare(
                 "SELECT metric, interval, tags, data_retention " +
                         "FROM metrics_idx " +
                         "WHERE tenant_id = ? AND type = ?");
+
         insertGaugeData = session
                 .prepare(
                 "UPDATE data " +
                         "USING TTL ?" +
                         "SET m_tags = m_tags + ?, n_value = ? " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ? ");
-        findGaugeDataByDateRangeExclusive = session.prepare(
-                "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
-                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+
+        findGaugeDataByDateRangeExclusive = session
+                .prepare(
+                "SELECT time, m_tags, data_retention, n_value, tags FROM data "
+                        +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ? AND time >= ?"
                         + " AND time < ?");
-        findGaugeDataByDateRangeExclusiveASC = session.prepare(
-                "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
-                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+
+        findGaugeDataByDateRangeExclusiveASC = session
+                .prepare(
+                "SELECT time, m_tags, data_retention, n_value, tags FROM data "
+                        +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ? AND time >= ?"
                         +
                         " AND time < ? ORDER BY time ASC");
-        findGaugeDataWithWriteTimeByDateRangeExclusive = session.prepare(
-                "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data " +
-                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+
+        findGaugeDataWithWriteTimeByDateRangeExclusive = session
+                .prepare(
+                "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data "
+                        +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ? AND time >= ?"
                         + " AND time < ?");
+
         findGaugeDataByDateRangeInclusive = session.prepare(
                 "SELECT tenant_id, metric, interval, dpart, time, m_tags, data_retention, n_value, tags " +
                         "FROM data " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
                         + " AND time <= ?");
+
         findGaugeDataWithWriteTimeByDateRangeInclusive = session.prepare(
                 "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
                         + " AND time <= ?");
+
         findAvailabilityByDateRangeInclusive = session.prepare(
                 "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
                         + " AND time <= ?");
+
         deleteGaugeMetric = session.prepare(
                 "DELETE FROM data " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+
         findGaugeMetrics = session.prepare(
                 "SELECT DISTINCT tenant_id, type, metric, interval, dpart FROM data;");
+
         updateCounter = session.prepare(
                 "UPDATE counters " +
                         "SET c_value = c_value + ? " +
                         "WHERE tenant_id = ? AND group = ? AND c_name = ?");
+
         findCountersByGroup = session.prepare(
                 "SELECT tenant_id, group, c_name, c_value FROM counters WHERE tenant_id = ? AND group = ?");
+
         findCountersByGroupAndName = session
                 .prepare(
-                "SELECT tenant_id, group, c_name, c_value FROM counters WHERE tenant_id = ? AND group = ? AND c_name IN ?");
+                "SELECT tenant_id, group, c_name, c_value FROM counters WHERE tenant_id = ? "
+                + "AND group = ? AND c_name IN ?");
+
         insertGaugeTags = session.prepare(
                 "INSERT INTO tags (tenant_id, tname, tvalue, type, metric, interval, time, n_value) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
                         "USING TTL ?");
+
         insertAvailabilityTags = session.prepare(
                 "INSERT INTO tags (tenant_id, tname, tvalue, type, metric, interval, time, availability) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
                         "USING TTL ?");
+
         updateDataWithTags = session.prepare(
                 "UPDATE data " +
                         "SET tags = tags + ? " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ?");
+
         findGaugeDataByTag = session.prepare(
                 "SELECT tenant_id, tname, tvalue, type, metric, interval, time, n_value " +
                         "FROM tags " +
                         "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
+
         findAvailabilityByTag = session.prepare(
                 "SELECT tenant_id, tname, tvalue, type, metric, interval, time, availability " +
                         "FROM tags " +
                         "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
+
         insertAvailability = session.prepare(
                 "UPDATE data " +
                         "USING TTL ? " +
                         "SET m_tags = m_tags + ?, availability = ? " +
                         "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ?");
-        findAvailabilities = session.prepare(
-                "SELECT time, m_tags, data_retention, availability, tags FROM data " +
-                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+
+        findAvailabilities = session
+                .prepare(
+                "SELECT time, m_tags, data_retention, availability, tags FROM data "
+                        +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ? AND time >= ?"
                         + " AND time < ? " +
                         "ORDER BY time ASC");
-        findAvailabilitiesWithWriteTime = session.prepare(
-                "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data " +
-                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+
+        findAvailabilitiesWithWriteTime = session
+                .prepare(
+                "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data "
+                        +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart in ? AND time >= ?"
                         +
                         " AND time < ?");
+
         updateRetentionsIndex = session.prepare(
                 "INSERT INTO retentions_idx (tenant_id, type, interval, metric, retention) VALUES (?, ?, ?, ?, ?)");
+
         findDataRetentions = session.prepare(
                 "SELECT tenant_id, type, interval, metric, retention " +
                         "FROM retentions_idx " +
                         "WHERE tenant_id = ? AND type = ?");
+
         insertMetricsTagsIndex = session.prepare(
                 "INSERT INTO metrics_tags_idx (tenant_id, tname, tvalue, type, metric, interval) VALUES " +
                         "(?, ?, ?, ?, ?, ?)");
+
         deleteMetricsTagsIndex = session
                 .prepare(
                 "DELETE FROM metrics_tags_idx "
                         +
-                        "WHERE tenant_id = ? AND tname = ? AND tvalue = ? AND type = ? AND metric = ? AND interval = ?");
+                        "WHERE tenant_id = ? AND tname = ? AND tvalue = ? AND type = ? "
+                        + "AND metric = ? AND interval = ?");
+
         findMetricsByTagName = session.prepare(
                 "SELECT tvalue, type, metric, interval " +
                         "FROM metrics_tags_idx " +
@@ -262,6 +352,7 @@ public class DataAccessImpl implements DataAccess {
             value.setSet("fns", template.getFunctions());
             templateValues.add(value);
         }
+
         Map<TupleValue, Integer> retentions = new HashMap<>();
         for (RetentionSettings.RetentionKey key : tenant.getRetentionSettings().keySet()) {
             TupleType metricType = TupleType.of(DataType.cint(), DataType.text());
@@ -274,6 +365,7 @@ public class DataAccessImpl implements DataAccess {
             }
             retentions.put(tuple, tenant.getRetentionSettings().get(key));
         }
+
         return session.executeAsync(insertTenant.bind(tenant.getId(), retentions, templateValues));
     }
 
@@ -374,7 +466,7 @@ public class DataAccessImpl implements DataAccess {
         for (GaugeData d : metric.getData()) {
             batchStatement.add(insertGaugeData.bind(ttl, getTags(metric), d.getValue(), metric.getTenantId(),
                     metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                    metric.getDpart(), d.getTimeUUID()));
+                    hashedDpart(d.getTimestamp(), timeSpan), d.getTimeUUID()));
         }
         return session.executeAsync(batchStatement);
     }
@@ -389,11 +481,13 @@ public class DataAccessImpl implements DataAccess {
         if (order == Order.ASC) {
             return session.executeAsync(findGaugeDataByDateRangeExclusiveASC.bind(metric.getTenantId(),
                     MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                    metric.getDpart(), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                    dpartRangeASC(startTime, endTime, timeSpan), TimeUUIDUtils.getTimeUUID(startTime),
+                    TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
         } else {
             return session.executeAsync(findGaugeDataByDateRangeExclusive.bind(metric.getTenantId(),
                     MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                    metric.getDpart(), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                    dpartRangeDESC(startTime, endTime, timeSpan), TimeUUIDUtils.getTimeUUID(startTime),
+                    TimeUUIDUtils.getTimeUUID(endTime)));
         }
     }
 
@@ -402,11 +496,13 @@ public class DataAccessImpl implements DataAccess {
             boolean includeWriteTime) {
         if (includeWriteTime) {
             return session.executeAsync(findGaugeDataWithWriteTimeByDateRangeExclusive.bind(tenantId,
-                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), Metric.DPART,
+                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(),
+                    dpartRangeDESC(startTime, endTime, timeSpan),
                     TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
         } else {
             return session.executeAsync(findGaugeDataByDateRangeExclusive.bind(tenantId,
-                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(), Metric.DPART,
+                    MetricType.GAUGE.getCode(), id.getName(), id.getInterval().toString(),
+                    dpartRangeDESC(startTime, endTime, timeSpan),
                     TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
         }
     }
@@ -416,11 +512,11 @@ public class DataAccessImpl implements DataAccess {
         if (includeWriteTime) {
             return session.executeAsync(findGaugeDataWithWriteTimeByDateRangeInclusive.bind(metric.getTenantId(),
                     MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                    metric.getDpart(), UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
+                    hashedDpart(timestamp, timeSpan), UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
         } else {
             return session.executeAsync(findGaugeDataByDateRangeInclusive.bind(metric.getTenantId(),
                     MetricType.GAUGE.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                    metric.getDpart(), UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
+                    hashedDpart(timestamp, timeSpan), UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
         }
     }
 
@@ -435,12 +531,15 @@ public class DataAccessImpl implements DataAccess {
             return session.executeAsync(findAvailabilitiesWithWriteTime.bind(metric.getTenantId(),
                     MetricType.AVAILABILITY.getCode(), metric.getId().getName(), metric.getId().getInterval()
                             .toString(),
-                    metric.getDpart(), TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                    dpartRangeDESC(startTime, endTime, timeSpan), TimeUUIDUtils.getTimeUUID(startTime),
+                    TimeUUIDUtils.getTimeUUID(endTime)));
         } else {
             return session.executeAsync(findAvailabilities.bind(metric.getTenantId(),
                     MetricType.AVAILABILITY.getCode(),
-                    metric.getId().getName(), metric.getId().getInterval().toString(), metric.getDpart(),
-                    TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)));
+                    metric.getId().getName(), metric.getId().getInterval().toString(),
+                    dpartRangeASC(startTime, endTime, timeSpan),
+                    TimeUUIDUtils.getTimeUUID(startTime), TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(
+                    Integer.MAX_VALUE));
         }
     }
 
@@ -448,7 +547,7 @@ public class DataAccessImpl implements DataAccess {
     public ResultSetFuture findData(Availability metric, long timestamp) {
         return session.executeAsync(findAvailabilityByDateRangeInclusive.bind(metric.getTenantId(),
                 MetricType.AVAILABILITY.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                metric.getDpart(), UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
+                hashedDpart(timestamp, timeSpan), UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
     }
 
     @Override
@@ -489,7 +588,8 @@ public class DataAccessImpl implements DataAccess {
     @Override
     public ResultSetFuture updateDataWithTag(Metric<?> metric, MetricData data, Map<String, String> tags) {
         return session.executeAsync(updateDataWithTags.bind(tags, metric.getTenantId(), metric.getType().getCode(),
-                metric.getId().getName(), metric.getId().getInterval().toString(), metric.getDpart(),
+                metric.getId().getName(), metric.getId().getInterval().toString(),
+                hashedDpart(data.getTimestamp(), timeSpan),
                 data.getTimeUUID()));
     }
 
@@ -509,7 +609,7 @@ public class DataAccessImpl implements DataAccess {
         for (AvailabilityData a : metric.getData()) {
             batchStatement.add(insertAvailability.bind(ttl, metric.getTags(), a.getBytes(), metric.getTenantId(),
                     metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
-                    metric.getDpart(), a.getTimeUUID()));
+                    hashedDpart(a.getTimestamp(), timeSpan), a.getTimeUUID()));
         }
         return session.executeAsync(batchStatement);
     }
@@ -517,8 +617,9 @@ public class DataAccessImpl implements DataAccess {
     @Override
     public ResultSetFuture findAvailabilityData(String tenantId, MetricId id, long startTime, long endTime) {
         return session.executeAsync(findAvailabilities.bind(tenantId, MetricType.AVAILABILITY.getCode(),
-                id.getName(), id.getInterval().toString(), Metric.DPART, TimeUUIDUtils.getTimeUUID(startTime),
-                TimeUUIDUtils.getTimeUUID(endTime)));
+                id.getName(), id.getInterval().toString(), dpartRangeASC(startTime, endTime, timeSpan),
+                TimeUUIDUtils.getTimeUUID(startTime),
+                TimeUUIDUtils.getTimeUUID(endTime)).setFetchSize(Integer.MAX_VALUE));
     }
 
     @Override
@@ -598,4 +699,25 @@ public class DataAccessImpl implements DataAccess {
     private KeyspaceMetadata getKeyspace() {
         return session.getCluster().getMetadata().getKeyspace(session.getLoggedKeyspace());
     }
+
+    private long hashedDpart(long time, long timeStpan) {
+        return time / timeSpan;
+    }
+
+    private List<Long> dpartRangeDESC(long startTime, long endTime, long timeSpan) {
+        ArrayList<Long> range = new ArrayList<Long>();
+        for (long i = endTime / timeSpan; i >= startTime / timeSpan; i--) {
+            range.add(i);
+        }
+        return range;
+    }
+
+    private List<Long> dpartRangeASC(long startTime, long endTime, long timeSpan) {
+        ArrayList<Long> range = new ArrayList<Long>();
+        for (long i = startTime / timeSpan; i <= endTime / timeSpan; i++) {
+            range.add(i);
+        }
+        return range;
+    }
+
 }
