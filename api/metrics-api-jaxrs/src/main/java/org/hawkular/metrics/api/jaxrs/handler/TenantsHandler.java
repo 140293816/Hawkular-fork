@@ -18,8 +18,11 @@ package org.hawkular.metrics.api.jaxrs.handler;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.collectionToResponse;
+import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.emptyPayload;
+import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.serverError;
+
 import java.net.URI;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -30,23 +33,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import org.hawkular.metrics.api.jaxrs.ApiError;
+import org.hawkular.metrics.api.jaxrs.handler.observer.TenantCreatedObserver;
+import org.hawkular.metrics.api.jaxrs.request.TenantParam;
+import org.hawkular.metrics.core.api.MetricsService;
+import org.hawkular.metrics.core.api.Tenant;
+
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import com.wordnik.swagger.annotations.ApiResponse;
 import com.wordnik.swagger.annotations.ApiResponses;
-
-import org.hawkular.metrics.api.jaxrs.ApiError;
-import org.hawkular.metrics.api.jaxrs.callback.TenantCreatedCallback;
-import org.hawkular.metrics.api.jaxrs.util.ApiUtils;
-import org.hawkular.metrics.core.api.MetricsService;
-import org.hawkular.metrics.core.api.Tenant;
 
 /**
  * @author Thomas Segismont
@@ -76,18 +75,16 @@ public class TenantsHandler {
                          response = ApiError.class)
     })
     public void createTenant(
-            @Suspended AsyncResponse asyncResponse, @ApiParam(required = true) Tenant params,
+            @Suspended AsyncResponse asyncResponse, @ApiParam(required = true) TenantParam params,
             @Context UriInfo uriInfo
     ) {
         if (params == null) {
-            Response response = Response.status(Status.BAD_REQUEST).entity(new ApiError("Payload is empty")).build();
-            asyncResponse.resume(response);
+            asyncResponse.resume(emptyPayload());
             return;
         }
-        ListenableFuture<Void> insertFuture = metricsService.createTenant(params);
-        URI created = uriInfo.getBaseUriBuilder().path("/tenants").build();
-        TenantCreatedCallback tenantCreatedCallback = new TenantCreatedCallback(asyncResponse, created);
-        Futures.addCallback(insertFuture, tenantCreatedCallback);
+        URI location = uriInfo.getBaseUriBuilder().path("/tenants").build();
+        metricsService.createTenant(new Tenant(params.getId())).subscribe(new TenantCreatedObserver(asyncResponse,
+                location));
     }
 
     @GET
@@ -99,9 +96,11 @@ public class TenantsHandler {
                          response = ApiError.class)
     })
     public void findTenants(@Suspended AsyncResponse asyncResponse) {
-        ApiUtils.executeAsync(asyncResponse, () -> {
-            ListenableFuture<List<Tenant>> future = metricsService.getTenants();
-            return Futures.transform(future, ApiUtils.MAP_COLLECTION);
-        });
+        metricsService.getTenants()
+                .map(TenantParam::new)
+                .toList().subscribe(
+                tenants -> asyncResponse.resume(collectionToResponse(tenants)),
+                error -> asyncResponse.resume(serverError(error))
+        );
     }
 }

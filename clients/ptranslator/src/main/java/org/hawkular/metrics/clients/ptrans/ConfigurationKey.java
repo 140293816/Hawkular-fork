@@ -40,12 +40,20 @@ public enum ConfigurationKey {
     STATSD_PORT("statsd.port"),
     /** UDP port for collectd type of messages **/
     COLLECTD_PORT("collectd.port"),
+    /**
+     * TCP port for graphite type of messages
+     **/
+    GRAPHITE_PORT("graphite.port"),
     /** Minimum batch size of metrics to be forwarded (from one source) **/
     BATCH_SIZE("batch.size"),
     /** Maximum time (in seconds) a batch of metrics can stay unchanged before it is forwarded (from one source) **/
     BATCH_DELAY("batch.delay"),
     /** REST endpoint **/
     REST_URL("rest.url"),
+    /**
+     * If present the HTTP proxy to use
+     **/
+    HTTP_PROXY("http.proxy"),
     /** Tenant **/
     TENANT("tenant"),
     /** Close connection to rest-server after this many requests **/

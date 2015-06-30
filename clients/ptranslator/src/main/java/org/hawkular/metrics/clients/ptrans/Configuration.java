@@ -22,6 +22,8 @@ import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.COLLECTD_PORT
 import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.GANGLIA_GROUP;
 import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.GANGLIA_MULTICAST_INTERFACE;
 import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.GANGLIA_PORT;
+import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.GRAPHITE_PORT;
+import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.HTTP_PROXY;
 import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.REST_CLOSE_AFTER_REQUESTS;
 import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.REST_URL;
 import static org.hawkular.metrics.clients.ptrans.ConfigurationKey.SERVICES;
@@ -56,10 +58,12 @@ public class Configuration {
     private final String gangliaGroup;
     private final int statsDport;
     private final int collectdPort;
+    private final int graphitePort;
     private final String multicastIfOverride;
     private final int minimumBatchSize;
     private final int maximumBatchDelay;
     private final URI restUrl;
+    private final URI httpProxy;
     private final String tenant;
     private final int restCloseAfterRequests;
     private final int spoolSize;
@@ -73,10 +77,12 @@ public class Configuration {
             String gangliaGroup,
             int statsDport,
             int collectdPort,
+            int graphitePort,
             String multicastIfOverride,
             int minimumBatchSize,
             int maximumBatchDelay,
             URI restUrl,
+            URI httpProxy,
             String tenant,
             int restCloseAfterRequests,
             int spoolSize,
@@ -89,10 +95,12 @@ public class Configuration {
         this.statsDport = statsDport;
         this.collectdPort = collectdPort;
         this.gangliaGroup = gangliaGroup;
+        this.graphitePort = graphitePort;
         this.multicastIfOverride = multicastIfOverride;
         this.minimumBatchSize = minimumBatchSize;
         this.maximumBatchDelay = maximumBatchDelay;
         this.restUrl = restUrl;
+        this.httpProxy = httpProxy;
         this.tenant = tenant;
         this.restCloseAfterRequests = restCloseAfterRequests;
         this.spoolSize = spoolSize;
@@ -109,10 +117,16 @@ public class Configuration {
         String multicastIfOverride = properties.getProperty(GANGLIA_MULTICAST_INTERFACE.toString());
         int statsDport = getIntProperty(properties, STATSD_PORT, 8125);
         int collectdPort = getIntProperty(properties, COLLECTD_PORT, 25826);
+        int graphitePort = getIntProperty(properties, GRAPHITE_PORT, 2003);
         int minimumBatchSize = getIntProperty(properties, BATCH_SIZE, 50);
         int maximumBatchDelay = getIntProperty(properties, BATCH_DELAY, 1);
         URI restUrl = URI.create(properties.getProperty(REST_URL.toString(),
             "http://localhost:8080/hawkular/metrics/gauges/data"));
+        String proxyString = properties.getProperty(HTTP_PROXY.toString());
+        URI httpProxy = null;
+        if (proxyString != null && !proxyString.trim().isEmpty()) {
+            httpProxy = URI.create(proxyString);
+        }
         String tenant = properties.getProperty(TENANT.toString(), "default");
         int restCloseAfterRequests = getIntProperty(properties, REST_CLOSE_AFTER_REQUESTS, 200);
         int spoolSize = getIntProperty(properties, SPOOL_SIZE, 10000);
@@ -124,10 +138,12 @@ public class Configuration {
                 gangliaGroup,
                 statsDport,
                 collectdPort,
+                graphitePort,
                 multicastIfOverride,
                 minimumBatchSize,
                 maximumBatchDelay,
                 restUrl,
+                httpProxy,
                 tenant,
                 restCloseAfterRequests,
                 spoolSize,
@@ -207,6 +223,10 @@ public class Configuration {
         return collectdPort;
     }
 
+    public int getGraphitePort() {
+        return graphitePort;
+    }
+
     public String getGangliaGroup() {
         return gangliaGroup;
     }
@@ -225,6 +245,10 @@ public class Configuration {
 
     public URI getRestUrl() {
         return restUrl;
+    }
+
+    public URI getHttpProxy() {
+        return httpProxy;
     }
 
     public String getTenant() {

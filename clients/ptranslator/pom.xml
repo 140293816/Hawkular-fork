@@ -25,7 +25,7 @@
   <parent>
     <groupId>org.hawkular.metrics</groupId>
     <artifactId>hawkular-metrics-parent</artifactId>
-    <version>0.3.4-SNAPSHOT</version>
+    <version>0.5.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -36,7 +36,6 @@
   <description>A protocol translator that can receive data from various system and feed it to the Hawkular Metrics REST api.</description>
 
   <properties>
-    <hawkular-metrics.backend>cass</hawkular-metrics.backend>
     <cassandra.keyspace>hawkular_metrics_ptrans_integration_tests</cassandra.keyspace>
     <!-- IMPORTANT: The port must be the port offset + 8080. -->
     <base-uri>127.0.0.1:55988/hawkular/metrics</base-uri>
@@ -45,6 +44,9 @@
     <ptrans.wildfly.management.port>57898</ptrans.wildfly.management.port>
     <wildfly.logging.console.level>ERROR</wildfly.logging.console.level>
     <wildfly.logging.file.level>DEBUG</wildfly.logging.file.level>
+    <!-- Configuration files used when starting a development ptrans instance with mvn exec:java -->
+    <dev.log4j.configuration>${project.basedir}/log4j-dev.xml</dev.log4j.configuration>
+    <dev.ptrans.conf>${project.basedir}/ptrans.conf</dev.ptrans.conf>
   </properties>
 
   <dependencies>
@@ -103,6 +105,12 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.4.3</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jmxtrans.embedded</groupId>
+      <artifactId>embedded-jmxtrans</artifactId>
+      <version>1.0.15</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -228,9 +236,9 @@
                 <javaOpt>-Dsun.rmi.dgc.server.gcInterval=3600000</javaOpt>
                 <javaOpt>-Djboss.socket.binding.port-offset=${ptrans.wildfly.port.offset}</javaOpt>
                 <javaOpt>-Djboss.server.config.dir=${project.build.directory}/wildfly-configuration</javaOpt>
-                <javaOpt>-Dhawkular-metrics.backend=${hawkular-metrics.backend}</javaOpt>
                 <javaOpt>-Dcassandra.keyspace=${cassandra.keyspace}</javaOpt>
-                <javaOpt>-Dcassandra.resetdb=true</javaOpt>
+                <javaOpt>-Dcassandra.resetdb</javaOpt>
+                <javaOpt>-Dhawkular.metrics.waitForService</javaOpt>
                 <javaOpt>-Xdebug</javaOpt>
                 <javaOpt>-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8787</javaOpt>
               </javaOpts>
@@ -265,12 +273,12 @@
           <systemProperties>
             <systemProperty>
               <key>log4j.configuration</key>
-              <value>file:${project.basedir}/log4j-dev.xml</value>
+              <value>file:${dev.log4j.configuration}</value>
             </systemProperty>
           </systemProperties>
           <arguments>
             <argument>-c</argument>
-            <argument>${project.basedir}/ptrans.conf</argument>
+            <argument>${dev.ptrans.conf}</argument>
           </arguments>
         </configuration>
       </plugin>
@@ -302,5 +310,4 @@
       </build>
     </profile>
   </profiles>
-
 </project>

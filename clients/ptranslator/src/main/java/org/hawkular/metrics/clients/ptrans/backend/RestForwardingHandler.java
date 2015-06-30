@@ -19,30 +19,6 @@ package org.hawkular.metrics.clients.ptrans.backend;
 import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpMethod.POST;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestEncoder;
-import io.netty.handler.codec.http.HttpResponseDecoder;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.util.AttributeKey;
-import io.netty.util.CharsetUtil;
 
 import java.net.ConnectException;
 import java.net.InetAddress;
@@ -57,6 +33,32 @@ import org.hawkular.metrics.clients.ptrans.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestEncoder;
+import io.netty.handler.codec.http.HttpResponseDecoder;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.AttributeKey;
+import io.netty.util.CharsetUtil;
+
 /**
  * Handler that takes incoming syslog metric messages (which are already parsed)
  * and forwards them to hawkular-metrics rest servlet.
@@ -67,11 +69,12 @@ import org.slf4j.LoggerFactory;
 public class RestForwardingHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(RestForwardingHandler.class);
 
-    private static final String TENANT_HEADER_NAME = "tenantId";
+    public static final String TENANT_HEADER_NAME = "Hawkular-Tenant";
 
-    private final String restHost;
-    private final int restPort;
-    private final String restUri;
+    private final String host;
+    private final int port;
+    private final String postUri;
+    private final String hostHeader;
     private final String tenant;
     private final int restCloseAfterRequests;
 
@@ -92,9 +95,17 @@ public class RestForwardingHandler extends ChannelInboundHandlerAdapter {
         LOG.debug("RestForwardingHandler init");
 
         URI restUrl = configuration.getRestUrl();
-        restHost = restUrl.getHost();
-        restPort = restUrl.getPort();
-        restUri = restUrl.getPath();
+        URI httpProxy = configuration.getHttpProxy();
+        if (httpProxy == null) {
+            host = restUrl.getHost();
+            port = restUrl.getPort();
+            postUri = restUrl.getPath();
+        } else {
+            host = httpProxy.getHost();
+            port = httpProxy.getPort();
+            postUri = restUrl.toString();
+        }
+        hostHeader = restUrl.getHost();
 
         tenant = configuration.getTenant();
 
@@ -161,10 +172,11 @@ public class RestForwardingHandler extends ChannelInboundHandlerAdapter {
 
         String payload = Batcher.metricListToJson(metricsToSend);
         ByteBuf content = Unpooled.copiedBuffer(payload, CharsetUtil.UTF_8);
-        FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, POST, restUri, content);
+        FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, POST, postUri, content);
         HttpHeaders.setHeader(request, CONTENT_TYPE, "application/json;charset=utf-8");
         HttpHeaders.setContentLength(request, content.readableBytes());
         HttpHeaders.setKeepAlive(request, true);
+        HttpHeaders.setHost(request, hostHeader);
         HttpHeaders.setHeader(request, TENANT_HEADER_NAME, tenant);
         // We need to send the list of metrics we are sending down the pipeline, so the status watcher
         // can later clean them out of the fifo
@@ -208,7 +220,7 @@ public class RestForwardingHandler extends ChannelInboundHandlerAdapter {
         }
 
         Bootstrap clientBootstrap = new Bootstrap();
-        clientBootstrap.group(group).channel(NioSocketChannel.class).remoteAddress(restHost, restPort)
+        clientBootstrap.group(group).channel(NioSocketChannel.class).remoteAddress(host, port)
             .handler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
@@ -231,30 +243,22 @@ public class RestForwardingHandler extends ChannelInboundHandlerAdapter {
      * for the next try.
      * @author Heiko W. Rupp
     */
-    class HttpStatusWatcher extends ChannelInboundHandlerAdapter {
+    class HttpStatusWatcher extends SimpleChannelInboundHandler<FullHttpResponse> {
         private final Logger logger = LoggerFactory.getLogger(HttpStatusWatcher.class);
 
         @Override
-        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-            if (msg instanceof FullHttpResponse) {
-                FullHttpResponse response = (FullHttpResponse) msg;
-                HttpResponseStatus status = response.getStatus();
-
-                if (status.equals(HttpResponseStatus.NO_CONTENT) || status.equals(HttpResponseStatus.OK)) {
-
-                    List<SingleMetric> metricsSent = ctx.channel().attr(listKey).getAndRemove();
-
-                    if (metricsSent != null) {
-                        // only clear the ones we sent - new ones may have arrived between batching and now
-                        fifo.cleanout(metricsSent);
-                        numberOfMetrics += metricsSent.size();
-                        logger.debug("sent {} items", metricsSent.size());
-                    }
-                } else {
-                    logger.warn("Send to rest-server failed:" + status);
+        protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse response) throws Exception {
+            HttpResponseStatus status = response.getStatus();
+            if (status.equals(HttpResponseStatus.NO_CONTENT) || status.equals(HttpResponseStatus.OK)) {
+                List<SingleMetric> metricsSent = ctx.channel().attr(listKey).getAndRemove();
+                if (metricsSent != null) {
+                    // only clear the ones we sent - new ones may have arrived between batching and now
+                    fifo.cleanout(metricsSent);
+                    numberOfMetrics += metricsSent.size();
+                    logger.debug("sent {} items", metricsSent.size());
                 }
             } else {
-                logger.error("msg " + msg);
+                logger.warn("Send to rest-server failed:" + status);
             }
         }
     }

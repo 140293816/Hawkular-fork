@@ -83,6 +83,7 @@ CREATE TABLE ${keyspace}.data (
     m_tags map<text, text> static,
     n_value double,
     availability blob,
+    l_value bigint,
     aggregates set<frozen <aggregate_data>>,
     tags map<text, text>,
     PRIMARY KEY ((tenant_id, type, metric, interval, dpart), time)
@@ -152,20 +153,11 @@ CREATE TABLE ${keyspace}.retentions_idx (
 
 -- #
 
-CREATE TABLE ${keyspace}.counters (
-    tenant_id text,
-    group text,
-    c_name text,
-    c_value counter,
-    PRIMARY KEY ((tenant_id, group), c_name)
-);
-
--- #
-
 CREATE TABLE ${keyspace}.task_queue (
     task_type text,
     time_slice timestamp,
     segment int,
+    tenant_id text,
     target text,
     sources set<text>,
     interval int,

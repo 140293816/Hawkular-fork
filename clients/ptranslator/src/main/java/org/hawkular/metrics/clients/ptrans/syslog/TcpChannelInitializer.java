@@ -16,7 +16,6 @@
  */
 package org.hawkular.metrics.clients.ptrans.syslog;
 
-import org.hawkular.metrics.clients.ptrans.Configuration;
 import org.hawkular.metrics.clients.ptrans.DemuxHandler;
 import org.hawkular.metrics.clients.ptrans.backend.RestForwardingHandler;
 
@@ -30,17 +29,15 @@ import io.netty.channel.socket.SocketChannel;
  * @author Thomas Segismont
  */
 public class TcpChannelInitializer extends ChannelInitializer<SocketChannel> {
-    private final Configuration configuration;
     private final RestForwardingHandler forwardingHandler;
 
-    public TcpChannelInitializer(Configuration configuration, RestForwardingHandler forwardingHandler) {
-        this.configuration = configuration;
+    public TcpChannelInitializer(RestForwardingHandler forwardingHandler) {
         this.forwardingHandler = forwardingHandler;
     }
 
     @Override
     public void initChannel(SocketChannel socketChannel) throws Exception {
         ChannelPipeline pipeline = socketChannel.pipeline();
-        pipeline.addLast(new DemuxHandler(configuration, forwardingHandler));
+        pipeline.addLast(new DemuxHandler(forwardingHandler));
     }
 }

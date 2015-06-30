@@ -18,4 +18,4 @@
 
 nodetool decommission
 nodetool stopdaemon
-exit 1
+exit 0

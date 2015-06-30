@@ -23,12 +23,12 @@
   <parent>
     <groupId>org.hawkular</groupId>
     <artifactId>hawkular-parent</artifactId>
-    <version>12</version>
+    <version>17</version>
   </parent>
 
   <groupId>org.hawkular.metrics</groupId>
   <artifactId>hawkular-metrics-parent</artifactId>
-  <version>0.3.4-SNAPSHOT</version>
+  <version>0.5.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <name>Hawkular Metrics</name>
@@ -77,17 +77,16 @@
   </developers>
 
   <modules>
+    <module>rx-java-driver</module>
     <module>schema-manager</module>
+    <module>task-queue</module>
     <module>core/metrics-core-api</module>
     <module>core/metrics-core-impl</module>
-    <module>task-queue</module>
-    <module>embedded-cassandra/embedded-cassandra-service</module>
-    <module>embedded-cassandra/embedded-cassandra-ear</module>
     <module>api/metrics-api-jaxrs</module>
     <module>rest-tests</module>
     <module>clients</module>
-    <module>ui/explorer</module>
     <module>containers</module>
+    <module>load-tests</module>
   </modules>
 
   <scm>
@@ -99,7 +98,6 @@
     <system>Travis-ci</system>
     <url>https://travis-ci.org/hawkular/hawkular-metrics</url>
   </ciManagement>
-
   <distributionManagement>
     <site>
       <id>local-site-tmp</id>
@@ -114,19 +112,15 @@
     <test.keyspace>hawkulartest</test.keyspace>
     <nodes>127.0.0.1</nodes>
 
-    <datastax.driver.version>2.1.5</datastax.driver.version>
     <joda.time.version>2.3</joda.time.version>
     <testng.version>6.8.8</testng.version>
     <slf4j.version>1.7.7</slf4j.version>
     <log4j.version>1.2.17</log4j.version>
-    <vertx.version>2.1RC3</vertx.version>
-    <vertx.testtools.version>2.0.3-final</vertx.testtools.version>
-    <jackson.version>2.3.2</jackson.version>
-    <trove4j.version>3.0.3</trove4j.version>
-    <google.guava.version>16.0.1</google.guava.version>
     <antlr.version>4.5</antlr.version>
+    <rxjava.version>1.0.10</rxjava.version>
+    <dropwizard.metrics.version>3.1.2</dropwizard.metrics.version>
+    <rxjava-math.version>1.0.0</rxjava-math.version>
 
-    <version.wildfly>8.2.0.Final</version.wildfly>
     <findbugs.version>3.0.0</findbugs.version>
 
   </properties>
@@ -134,21 +128,31 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
+        <groupId>io.reactivex</groupId>
+        <artifactId>rxjava</artifactId>
+        <version>${rxjava.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.reactivex</groupId>
+        <artifactId>rxjava-math</artifactId>
+        <version>${rxjava-math.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>${google.guava.version}</version>
+        <version>${version.com.google.guava}</version>
       </dependency>
       <dependency>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-runtime</artifactId>
         <version>${antlr.version}</version>
       </dependency>
-      <!-- Tests dependencies -->
       <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>1.10.19</version>
+        <groupId>io.dropwizard.metrics</groupId>
+        <artifactId>metrics-core</artifactId>
+        <version>${dropwizard.metrics.version}</version>
       </dependency>
+      <!-- Tests dependencies -->
       <!-- TestNG is not Hawkular default testing tool -->
       <!-- While needed to run legacy tests, new tests should be based upon jUnit -->
       <!-- It can still be used when there's a good reason (compatibility with a testing framework for example) -->
@@ -186,15 +190,13 @@
         <plugin>
           <groupId>org.wildfly.plugins</groupId>
           <artifactId>wildfly-maven-plugin</artifactId>
-          <version>1.1.0.Alpha2</version>
           <configuration>
-            <version>${version.wildfly}</version>
+            <version>${version.org.wildfly}</version>
           </configuration>
         </plugin>
 
       </plugins>
     </pluginManagement>
-
     <plugins>
 
       <plugin>
@@ -298,20 +300,6 @@
 
   <profiles>
 
-    <!-- Note that the test.debug profile has moved to hawkular-parent -->
-
-    <profile>
-      <id>download_wildfly</id>
-      <dependencies>
-        <dependency>
-          <groupId>org.wildfly</groupId>
-          <artifactId>wildfly-dist</artifactId>
-          <version>${version.wildfly}</version>
-          <type>zip</type>
-        </dependency>
-      </dependencies>
-    </profile>
-
     <profile>
       <id>publish</id>
 
@@ -347,5 +335,3 @@
     </profile>
   </profiles>
 </project>
-
-

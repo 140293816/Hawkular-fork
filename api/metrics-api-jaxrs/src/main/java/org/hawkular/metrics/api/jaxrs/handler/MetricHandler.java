@@ -17,6 +17,8 @@
 package org.hawkular.metrics.api.jaxrs.handler;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+
+import static org.hawkular.metrics.api.jaxrs.filter.TenantFilter.TENANT_HEADER_NAME;
 import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.badRequest;
 import static org.hawkular.metrics.api.jaxrs.util.ApiUtils.executeAsync;
 
@@ -36,9 +38,9 @@ import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Response;
 
 import org.hawkular.metrics.api.jaxrs.ApiError;
+import org.hawkular.metrics.api.jaxrs.request.MetricDefinition;
 import org.hawkular.metrics.api.jaxrs.request.MixedMetricsRequest;
 import org.hawkular.metrics.api.jaxrs.util.ApiUtils;
-import org.hawkular.metrics.core.api.Metric;
 import org.hawkular.metrics.core.api.MetricType;
 import org.hawkular.metrics.core.api.MetricsService;
 
@@ -63,37 +65,36 @@ public class MetricHandler {
     @Inject
     private MetricsService metricsService;
 
+    @HeaderParam(TENANT_HEADER_NAME)
+    private String tenantId;
+
     @GET
     @Path("/")
     @ApiOperation(value = "Find tenant's metric definitions.", notes = "Does not include any metric values. ",
-            response = List.class, responseContainer = "List")
-    @ApiResponses(value = { @ApiResponse(code = 200, message = "Successfully retrieved at least one metric "
-            + "definition."),
+                  response = List.class, responseContainer = "List")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully retrieved at least one metric definition."),
             @ApiResponse(code = 204, message = "No metrics found."),
-            @ApiResponse(code = 400, message = "Given type is not a valid type.", response = ApiError.class),
+            @ApiResponse(code = 400, message = "Missing or invalid type parameter type.", response = ApiError.class),
             @ApiResponse(code = 500, message = "Failed to retrieve metrics due to unexpected error.",
                          response = ApiError.class)
     })
     public void findMetrics(
             @Suspended final AsyncResponse asyncResponse,
-            @HeaderParam("tenantId") final String tenantId,
-            @ApiParam(value = "Queried metric type", required = true, allowableValues = "[gauge, availability]")
-        @QueryParam("type") String type) {
-
-        executeAsync(
-                asyncResponse, () -> {
-                    MetricType metricType = null;
-                    try {
-                        metricType = MetricType.fromTextCode(type);
-                    } catch (IllegalArgumentException e) {
-                        return badRequest(
-                                new ApiError("[" + type + "] is not a valid type. Accepted values are gauge|avail|log")
-                        );
-                    }
-                    ListenableFuture<List<Metric<?>>> future = metricsService.findMetrics(tenantId, metricType);
-                    return Futures.transform(future, ApiUtils.MAP_COLLECTION);
-                }
-        );
+            @ApiParam(value = "Queried metric type",
+                      required = true,
+                      allowableValues = "[gauge, availability, counter]")
+            @QueryParam("type") MetricType metricType
+    ) {
+        if (metricType == null) {
+            asyncResponse.resume(badRequest(new ApiError("Missing type param")));
+            return;
+        }
+        metricsService.findMetrics(tenantId, metricType)
+                      .map(MetricDefinition::new)
+                      .toList()
+                      .map(ApiUtils::collectionToResponse)
+                      .subscribe(asyncResponse::resume, t -> asyncResponse.resume(ApiUtils.serverError(t)));
     }
 
     @POST
@@ -103,29 +104,39 @@ public class MetricHandler {
             @ApiResponse(code = 200, message = "Adding data succeeded."),
             @ApiResponse(code = 500, message = "Unexpected error happened while storing the data",
                 response = ApiError.class) })
-    public void addMetricsData(@Suspended final AsyncResponse asyncResponse, @HeaderParam("tenantId") String tenantId,
-            @ApiParam(value = "List of metrics", required = true) MixedMetricsRequest metricsRequest) {
+    public void addMetricsData(
+            @Suspended final AsyncResponse asyncResponse,
+            @ApiParam(value = "List of metrics", required = true) MixedMetricsRequest metricsRequest
+    ) {
         executeAsync(asyncResponse, () -> {
             if ((metricsRequest.getGaugeMetrics() == null || !metricsRequest.getGaugeMetrics().isEmpty())
                     && (metricsRequest.getAvailabilityMetrics() == null || metricsRequest.getAvailabilityMetrics()
-                            .isEmpty())) {
+                    .isEmpty())) {
                 return Futures.immediateFuture(Response.ok().build());
             }
 
             List<ListenableFuture<Void>> simpleFuturesList = new ArrayList<>();
 
-            if (metricsRequest.getGaugeMetrics() != null && !metricsRequest.getGaugeMetrics().isEmpty()) {
-                metricsRequest.getGaugeMetrics().forEach(m -> m.setTenantId(tenantId));
-                simpleFuturesList.add(metricsService.addGaugeData(metricsRequest.getGaugeMetrics()));
-            }
-
-            if (metricsRequest.getAvailabilityMetrics() != null && !metricsRequest.getAvailabilityMetrics().isEmpty()) {
-                metricsRequest.getAvailabilityMetrics().forEach(m -> m.setTenantId(tenantId));
-                simpleFuturesList.add(metricsService.addAvailabilityData(metricsRequest.getAvailabilityMetrics()));
-            }
+//            if (metricsRequest.getGaugeMetrics() != null && !metricsRequest.getGaugeMetrics().isEmpty()) {
+//                metricsRequest.getGaugeMetrics().forEach(m -> m.setTenantId(tenantId));
+//                // TODO This needs to be fix - this needs to refactored..
+//                // Temporarily commented out to get it to compile as we midst of updating MetricsService
+//                // to use rx.Observable instead of ListenableFuture
+//
+//            //                Observable<Void> voidObservable = metricsService.addGaugeData(Observable.
+//            // from(metricsRequest.getGaugeMetrics()));
+//            //                simpleFuturesList.add(metricsService.addGaugeData(metricsRequest.getGaugeMetrics()));
+//            }
+//
+//            if (metricsRequest.getAvailabilityMetrics() != null
+//                    && !metricsRequest.getAvailabilityMetrics().isEmpty()) {
+//                metricsRequest.getAvailabilityMetrics().forEach(m -> m.setTenantId(tenantId));
+//                metricsService.addAvailabilityData(metricsRequest.getAvailabilityMetrics())
+//                        .subscribe(r -> asyncResponse.resume(Response.ok().build()),
+//                                   t -> asyncResponse.resume(ApiUtils.serverError(t)));
+//            }
 
             return Futures.transform(Futures.successfulAsList(simpleFuturesList), ApiUtils.MAP_LIST_VOID);
         });
     }
-
 }

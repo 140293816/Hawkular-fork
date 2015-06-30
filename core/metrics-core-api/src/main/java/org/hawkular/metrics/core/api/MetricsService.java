@@ -16,37 +16,20 @@
  */
 package org.hawkular.metrics.core.api;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import com.datastax.driver.core.Session;
-import com.google.common.util.concurrent.ListenableFuture;
+import rx.Observable;
+import rx.functions.Func1;
 
 /**
  * Interface that defines the functionality of the Metrics Service.
  * @author Heiko W. Rupp
  */
 public interface MetricsService {
-
-    // For now we will use a default or fake tenant id until we get APIs in place for
-    // creating tenants.
-    String DEFAULT_TENANT_ID = "test";
-
-    /** called to start the service up if needed
-     * @param params from e.g. servlet context */
-    void startUp(Map<String, String> params);
-
-    /**
-     * Startup with a given cassandra session
-     * @param session
-     */
-    void startUp(Session session);
-
-    void shutdown();
 
     /**
      * <p>
@@ -55,77 +38,133 @@ public interface MetricsService {
      * with the same id already exists.
      * </p>
      * <p>
-     * All data is associated with a {@link org.hawkular.metrics.core.api.Tenant tenant} via the tenant id; however,
-     * the foreign key like relationship is not enforced. Data can be inserted with a non-existent tenant id. More
+     * All data is associated with a {@link org.hawkular.metrics.core.api.Tenant tenant} via the tenant id; however, the
+     * foreign key like relationship is not enforced. Data can be inserted with a non-existent tenant id. More
      * importantly, data could be inserted with a tenant id that already exists.
      * </p>
      *
-     * @param tenant The {@link org.hawkular.metrics.core.api.Tenant tenant} to create
-     * @return
+     * @param tenant
+     *            The {@link Tenant tenant} to create
+     * @return void
      * @throws org.hawkular.metrics.core.api.TenantAlreadyExistsException
+     *             tenant already exists
      */
-    ListenableFuture<Void> createTenant(Tenant tenant);
+    Observable<Void> createTenant(Tenant tenant);
 
-    ListenableFuture<List<Tenant>> getTenants();
+    Observable<Tenant> getTenants();
 
-    ListenableFuture<Void> createMetric(Metric<?> metric);
+    /**
+     * <p>
+     * Clients are not required to required to explicitly create a metric via this method before storing data for it.
+     * This method does a few things. First, it updates indexes with the metric meta data (i.e., name, tags, etc.) so
+     * that it can be found in metric queries performed with {@link #findMetrics(String, MetricType)}. Querying by
+     * tags will be supported in the future. Secondly, this method ensures that there are no metric naming conflicts.
+     * If another metric with the same name already exists, then returned Observable will fail with a
+     * {@link MetricAlreadyExistsException}. Lastly, meta data settings are configured and persisted. Currently this
+     * includes a couple things - data retention and counter rates. If data retention is specified for the metric,
+     * those settings are stored so that they will be applied to any data points that get persisted. If the metric is
+     * a counter, then a background job is created to compute and store rate data points. It is not yet possible to
+     * configure the settings for the rate calculation job; however, that will change in the near future.
+     * </p>
+     * <p>
+     * Note that in the current implementation if metric creation fails, things can be in an inconsistent state. For
+     * example, an index that should have been updated might not have been. There is no work around for this currently.
+     * </p>
+     *
+     * @param metric The metric to create
+     *
+     * @return This method only has side effects and does not return any data. As such,
+     * {@link rx.Observer#onNext(Object) onNext} is not called. {@link rx.Observer#onCompleted()}  onCompleted}
+     * is called when the operation completes successfully, and {@link rx.Observer#onError(Throwable)}  onError}
+     * is called when it fails.
+     */
+    Observable<Void> createMetric(Metric<?> metric);
 
-    ListenableFuture<Optional<Metric<?>>> findMetric(String tenantId, MetricType type, MetricId id);
+    Observable<Metric> findMetric(String tenantId, MetricType type, MetricId id);
 
-    ListenableFuture<List<Metric<?>>> findMetrics(String tenantId, MetricType type);
+    Observable<Metric> findMetrics(String tenantId, MetricType type);
 
-    ListenableFuture<Map<String, String>> getMetricTags(String tenantId, MetricType type, MetricId id);
+    Observable<Optional<Map<String, String>>> getMetricTags(String tenantId, MetricType type, MetricId id);
 
-    ListenableFuture<Void> addTags(Metric metric, Map<String, String> tags);
+    Observable<Void> addTags(Metric metric, Map<String, String> tags);
 
-    ListenableFuture<Void> deleteTags(Metric metric, Map<String, String> tags);
+    Observable<Void> deleteTags(Metric metric, Map<String, String> tags);
 
-    ListenableFuture<Void> addGaugeData(List<Gauge> metrics);
+    Observable<Void> addGaugeData(Observable<Metric<Double>> gaugeObservable);
 
-    ListenableFuture<List<GaugeData>> findGaugeData(String tenantId, MetricId id, Long start, Long end);
+    /**
+     * Fetches data points for a gauge metric.
+     *
+     * @param tenantId The tenant to which the metric belongs
+     * @param id The metric name
+     * @param start The start time inclusive as  aUnix timestamp in milliseconds
+     * @param end The end time exclusive as a Unix timestamp in milliseconds
+     * @return an {@link Observable} that emits {@link DataPoint data points}
+     */
+    Observable<DataPoint<Double>> findGaugeData(String tenantId, MetricId id, Long start, Long end);
 
-    ListenableFuture<BucketedOutput<GaugeBucketDataPoint>> findGaugeStats(
-            Gauge metric, long start, long end, Buckets buckets
-    );
+    /**
+     * This method applies one or more functions to an Observable that emits data points of a gauge metric. The data
+     * points Observable is asynchronous. The functions however, are applied serially in the order specified.
+     *
+     * @param tenantId The tenant to which the metric belongs
+     * @param id The metric name
+     * @param start The start time inclusive as a Unix timestamp in milliseconds
+     * @param end The end time exclusive as a Unix timestamp in milliseconds
+     * @param funcs one or more functions to operate on the fetched gauge data
+     * @return An {@link Observable} that emits the results with the same ordering as funcs
+     * @see Aggregate
+     */
+    <T> Observable<T> findGaugeData(String tenantId, MetricId id, Long start, Long end,
+            Func1<Observable<DataPoint<Double>>, Observable<T>>... funcs);
 
-    ListenableFuture<Void> addAvailabilityData(List<Availability> metrics);
+    Observable<BucketedOutput<GaugeBucketDataPoint>> findGaugeStats(Metric<Double> metric, long start, long end,
+            Buckets buckets);
 
-    ListenableFuture<List<AvailabilityData>> findAvailabilityData(String tenantId, MetricId id, long start, long end);
+    Observable<Void> addAvailabilityData(List<Metric<AvailabilityType>> metrics);
 
-    ListenableFuture<List<AvailabilityData>> findAvailabilityData(String tenantId, MetricId id, long start, long end,
+    Observable<DataPoint<AvailabilityType>> findAvailabilityData(String tenantId, MetricId id, long start, long end);
+
+    Observable<DataPoint<AvailabilityType>> findAvailabilityData(String tenantId, MetricId id, long start, long end,
             boolean distinct);
 
-    ListenableFuture<BucketedOutput<AvailabilityBucketDataPoint>> findAvailabilityStats(
-            Availability metric, long start, long end, Buckets buckets
-    );
-
-    ListenableFuture<Void> updateCounter(Counter counter);
-
-    ListenableFuture<Void> updateCounters(Collection<Counter> counters);
-
-    ListenableFuture<List<Counter>> findCounters(String group);
-
-    ListenableFuture<List<Counter>> findCounters(String group, List<String> counterNames);
+    Observable<BucketedOutput<AvailabilityBucketDataPoint>> findAvailabilityStats(Metric<AvailabilityType> metric,
+            long start, long end, Buckets buckets);
 
     /** Check if a metric with the passed {id} has been stored in the system */
-    ListenableFuture<Boolean> idExists(String id);
+    Observable<Boolean> idExists(String id);
 
-    ListenableFuture<List<GaugeData>> tagGaugeData(Gauge metric, Map<String, String> tags,
-        long start, long end);
+    Observable<Void> tagGaugeData(Metric<Double> metric, Map<String, String> tags, long start, long end);
 
-    ListenableFuture<List<AvailabilityData>> tagAvailabilityData(Availability metric, Map<String, String> tags,
-            long start, long end);
+    Observable<Void> tagAvailabilityData(Metric<AvailabilityType> metric, Map<String, String> tags, long start,
+            long end);
 
-    ListenableFuture<List<GaugeData>> tagGaugeData(Gauge metric, Map<String, String> tags,
-        long timestamp);
+    Observable<Void> tagGaugeData(Metric<Double> metric, Map<String, String> tags, long timestamp);
 
-    ListenableFuture<List<AvailabilityData>> tagAvailabilityData(Availability metric, Map<String, String> tags,
-            long timestamp);
+    Observable<Void> tagAvailabilityData(Metric<AvailabilityType> metric, Map<String, String> tags, long timestamp);
 
-    ListenableFuture<Map<MetricId, Set<GaugeData>>> findGaugeDataByTags(String tenantId, Map<String, String> tags);
+    Observable<Map<MetricId, Set<DataPoint<Double>>>> findGaugeDataByTags(String tenantId, Map<String, String> tags);
 
-    ListenableFuture<Map<MetricId, Set<AvailabilityData>>> findAvailabilityByTags(String tenantId,
+    Observable<Map<MetricId, Set<DataPoint<AvailabilityType>>>> findAvailabilityByTags(String tenantId,
             Map<String, String> tags);
+
+    Observable<Void> addCounterData(Observable<Metric<Long>> counters);
+
+    Observable<DataPoint<Long>> findCounterData(String tenantId, MetricId id, long start, long end);
+
+    /**
+     * Fetches counter rate data points which are automatically generated for counter metrics. Note that rate data is
+     * generated if the metric has been explicitly created via the {@link #createMetric(Metric)} method.
+     *
+     * @param tenantId The teant to which the metric belongs
+     * @param id This is the id of the counter metric
+     * @param start The start time which is inclusive
+     * @param end The end time which is exclusive
+     *
+     * @return An Observable of {@link DataPoint data points} which are emitted in descending order. In other words,
+     * the most recent data is emitted first.
+     */
+    Observable<DataPoint<Double>> findRateData(String tenantId, MetricId id, long start, long end);
 
     /**
      * <p>
@@ -151,6 +190,6 @@ public interface MetricsService {
      * @return Each element in the list is a two element array. The first element is the start time inclusive for which
      * the predicate matches, and the second element is the end time inclusive for which the predicate matches.
      */
-    ListenableFuture<List<long[]>> getPeriods(String tenantId, MetricId id, Predicate<Double> predicate, long start,
-        long end);
+    Observable<List<long[]>> getPeriods(String tenantId, MetricId id, Predicate<Double> predicate, long start,
+            long end);
 }
