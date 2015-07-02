@@ -1,12 +1,11 @@
 package org.hawkular.metrics.core.impl.testdata;
 
-import com.codahale.metrics.Meter;
 
 public class RunnableWriter implements Runnable {
     private Generator generator;
 
-    public RunnableWriter(int num, Meter meter) {
-        generator = new Generator(num, meter);
+    public RunnableWriter(int num) {
+        generator = new Generator(num);
     }
 
     @Override
