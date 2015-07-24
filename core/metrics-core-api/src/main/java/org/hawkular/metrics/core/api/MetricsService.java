@@ -82,7 +82,21 @@ public interface MetricsService {
 
     Observable<Metric> findMetric(String tenantId, MetricType type, MetricId id);
 
+    /**
+     * Returns tenant's metric definitions. The results can be filtered using a type.
+     *
+     * @param type If type is null, all user definable metric definitions are returned.
+     */
     Observable<Metric> findMetrics(String tenantId, MetricType type);
+
+    /**
+     * Returns tenant's metric definitions. The results can be filtered using a type and tags. Use findMetrics
+     * if you don't intend to use tags for filtering.
+     *
+     * @param tags Tag names and values that are used to filter definitions
+     * @param type Optional MetricType, if null is given all matching metrics are returned
+     */
+    Observable<Metric> findMetricsWithTags(String tenantId, Map<String, String> tags, MetricType type);
 
     Observable<Optional<Map<String, String>>> getMetricTags(String tenantId, MetricType type, MetricId id);
 
@@ -121,7 +135,7 @@ public interface MetricsService {
     Observable<BucketedOutput<GaugeBucketDataPoint>> findGaugeStats(Metric<Double> metric, long start, long end,
             Buckets buckets);
 
-    Observable<Void> addAvailabilityData(List<Metric<AvailabilityType>> metrics);
+    Observable<Void> addAvailabilityData(Observable<Metric<AvailabilityType>> availabilities);
 
     Observable<DataPoint<AvailabilityType>> findAvailabilityData(String tenantId, MetricId id, long start, long end);
 
@@ -154,7 +168,7 @@ public interface MetricsService {
 
     /**
      * Fetches counter rate data points which are automatically generated for counter metrics. Note that rate data is
-     * generated if the metric has been explicitly created via the {@link #createMetric(Metric)} method.
+     * generated only if the metric has been explicitly created via the {@link #createMetric(Metric)} method.
      *
      * @param tenantId The teant to which the metric belongs
      * @param id This is the id of the counter metric

@@ -16,14 +16,13 @@
  */
 package org.hawkular.metrics.api.jaxrs.request;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.hawkular.metrics.api.jaxrs.model.Availability;
-import org.hawkular.metrics.api.jaxrs.model.Gauge;
-
-import com.google.common.base.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.wordnik.swagger.annotations.ApiModel;
+import org.hawkular.metrics.api.jaxrs.model.Availability;
+import org.hawkular.metrics.api.jaxrs.model.Counter;
+import org.hawkular.metrics.api.jaxrs.model.Gauge;
 
 /**
  * @author Stefan Negrea
@@ -31,32 +30,33 @@ import com.wordnik.swagger.annotations.ApiModel;
 @ApiModel
 public class MixedMetricsRequest {
 
-    private List<Gauge> gaugeMetrics = new ArrayList<>();
-    private List<Availability> availabilityMetrics = new ArrayList<>();
+    @JsonProperty("gauges")
+    private List<Gauge> gauges;
 
+    @JsonProperty("availabilities")
+    private List<Availability> availabilities;
 
-    public List<Gauge> getGaugeMetrics() {
-        return gaugeMetrics;
+    @JsonProperty("counters")
+    private List<Counter> counters;
+
+    public List<Gauge> getGauges() {
+        return gauges;
     }
 
-    public void setGaugeMetric(List<Gauge> gaugeMetrics) {
-        this.gaugeMetrics = gaugeMetrics;
+    public List<Availability> getAvailabilities() {
+        return availabilities;
     }
 
-    public List<Availability> getAvailabilityMetrics() {
-        return availabilityMetrics;
+    public List<Counter> getCounters() {
+        return counters;
     }
-
-    public void setAvailabilityMetrics(List<Availability> availabilityMetrics) {
-        this.availabilityMetrics = availabilityMetrics;
-    }
-
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .add("guageMetrics", gaugeMetrics)
-                .add("availibilityMetrics", availabilityMetrics)
-                .toString();
+        return "MixedMetricsRequest{" +
+                "gaugeMetrics=" + gauges +
+                ", availabilityMetrics=" + availabilities +
+                ", counters=" + counters +
+                '}';
     }
 }

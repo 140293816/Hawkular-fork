@@ -2,212 +2,212 @@
 <testng-results skipped="0" failed="0" total="25" passed="25">
   <reporter-output>
   </reporter-output>
-  <suite name="Default suite" duration-ms="34906" started-at="2015-06-30T21:55:17Z" finished-at="2015-06-30T21:55:52Z">
+  <suite name="Default suite" duration-ms="26879" started-at="2015-07-23T23:42:54Z" finished-at="2015-07-23T23:43:21Z">
     <groups>
     </groups>
-    <test name="Default test" duration-ms="34906" started-at="2015-06-30T21:55:17Z" finished-at="2015-06-30T21:55:52Z">
+    <test name="Default test" duration-ms="26879" started-at="2015-07-23T23:42:54Z" finished-at="2015-07-23T23:43:21Z">
       <class name="org.hawkular.metrics.core.impl.DataAccessITest2">
-        <test-method status="PASS" signature="initClass()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initClass" is-config="true" duration-ms="1180" started-at="2015-06-30T22:55:17Z" finished-at="2015-06-30T22:55:18Z">
+        <test-method status="PASS" signature="initClass()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initClass" is-config="true" duration-ms="1271" started-at="2015-07-24T00:42:54Z" finished-at="2015-07-24T00:42:55Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initClass -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1478" started-at="2015-06-30T22:55:18Z" finished-at="2015-06-30T22:55:20Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1164" started-at="2015-07-24T00:42:55Z" finished-at="2015-07-24T00:42:57Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="doNotAllowDuplicateTenants()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="doNotAllowDuplicateTenants" duration-ms="92" started-at="2015-06-30T22:55:20Z" finished-at="2015-06-30T22:55:20Z">
+        <test-method status="PASS" signature="doNotAllowDuplicateTenants()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="doNotAllowDuplicateTenants" duration-ms="92" started-at="2015-07-24T00:42:57Z" finished-at="2015-07-24T00:42:57Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- doNotAllowDuplicateTenants -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1362" started-at="2015-06-30T22:55:20Z" finished-at="2015-06-30T22:55:21Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="958" started-at="2015-07-24T00:42:57Z" finished-at="2015-07-24T00:42:58Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailabilitiesInOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesInOneBucket" duration-ms="116" started-at="2015-06-30T22:55:21Z" finished-at="2015-06-30T22:55:21Z">
+        <test-method status="PASS" signature="insertAndFindAvailabilitiesInOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesInOneBucket" duration-ms="115" started-at="2015-07-24T00:42:58Z" finished-at="2015-07-24T00:42:58Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailabilitiesInOneBucket -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1112" started-at="2015-06-30T22:55:21Z" finished-at="2015-06-30T22:55:22Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="995" started-at="2015-07-24T00:42:58Z" finished-at="2015-07-24T00:42:59Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailabilitiesInThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesInThreeBuckets" duration-ms="28" started-at="2015-06-30T22:55:22Z" finished-at="2015-06-30T22:55:23Z">
+        <test-method status="PASS" signature="insertAndFindAvailabilitiesInThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesInThreeBuckets" duration-ms="16" started-at="2015-07-24T00:42:59Z" finished-at="2015-07-24T00:42:59Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailabilitiesInThreeBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1141" started-at="2015-06-30T22:55:23Z" finished-at="2015-06-30T22:55:24Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="879" started-at="2015-07-24T00:42:59Z" finished-at="2015-07-24T00:43:00Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailabilitiesInTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesInTwoBuckets" duration-ms="15" started-at="2015-06-30T22:55:24Z" finished-at="2015-06-30T22:55:24Z">
+        <test-method status="PASS" signature="insertAndFindAvailabilitiesInTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesInTwoBuckets" duration-ms="14" started-at="2015-07-24T00:43:00Z" finished-at="2015-07-24T00:43:00Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailabilitiesInTwoBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1275" started-at="2015-06-30T22:55:24Z" finished-at="2015-06-30T22:55:25Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1115" started-at="2015-07-24T00:43:00Z" finished-at="2015-07-24T00:43:01Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket" duration-ms="7" started-at="2015-06-30T22:55:25Z" finished-at="2015-06-30T22:55:25Z">
+        <test-method status="PASS" signature="insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket" duration-ms="6" started-at="2015-07-24T00:43:01Z" finished-at="2015-07-24T00:43:01Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailabilitiesWithoutWriteTimeInOneBucket -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1078" started-at="2015-06-30T22:55:25Z" finished-at="2015-06-30T22:55:26Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1174" started-at="2015-07-24T00:43:01Z" finished-at="2015-07-24T00:43:02Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets" duration-ms="46" started-at="2015-06-30T22:55:26Z" finished-at="2015-06-30T22:55:26Z">
+        <test-method status="PASS" signature="insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets" duration-ms="19" started-at="2015-07-24T00:43:02Z" finished-at="2015-07-24T00:43:02Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailabilitiesWithoutWriteTimeInThreeBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="986" started-at="2015-06-30T22:55:26Z" finished-at="2015-06-30T22:55:27Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="965" started-at="2015-07-24T00:43:02Z" finished-at="2015-07-24T00:43:03Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets" duration-ms="21" started-at="2015-06-30T22:55:27Z" finished-at="2015-06-30T22:55:27Z">
+        <test-method status="PASS" signature="insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets" duration-ms="10" started-at="2015-07-24T00:43:03Z" finished-at="2015-07-24T00:43:03Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailabilitiesWithoutWriteTimeInTwoBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1040" started-at="2015-06-30T22:55:27Z" finished-at="2015-06-30T22:55:28Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1054" started-at="2015-07-24T00:43:03Z" finished-at="2015-07-24T00:43:04Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailbilitiesWithWriteTimeInOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailbilitiesWithWriteTimeInOneBucket" duration-ms="10" started-at="2015-06-30T22:55:28Z" finished-at="2015-06-30T22:55:28Z">
+        <test-method status="PASS" signature="insertAndFindAvailbilitiesWithWriteTimeInOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailbilitiesWithWriteTimeInOneBucket" duration-ms="12" started-at="2015-07-24T00:43:04Z" finished-at="2015-07-24T00:43:04Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailbilitiesWithWriteTimeInOneBucket -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1124" started-at="2015-06-30T22:55:28Z" finished-at="2015-06-30T22:55:29Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1112" started-at="2015-07-24T00:43:04Z" finished-at="2015-07-24T00:43:05Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets" duration-ms="25" started-at="2015-06-30T22:55:29Z" finished-at="2015-06-30T22:55:29Z">
+        <test-method status="PASS" signature="insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets" duration-ms="16" started-at="2015-07-24T00:43:05Z" finished-at="2015-07-24T00:43:05Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailbilitiesWithWriteTimeInThreeBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1072" started-at="2015-06-30T22:55:29Z" finished-at="2015-06-30T22:55:30Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1362" started-at="2015-07-24T00:43:05Z" finished-at="2015-07-24T00:43:07Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets" duration-ms="15" started-at="2015-06-30T22:55:30Z" finished-at="2015-06-30T22:55:30Z">
+        <test-method status="PASS" signature="insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets" duration-ms="12" started-at="2015-07-24T00:43:07Z" finished-at="2015-07-24T00:43:07Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindAvailbilitiesWithWriteTimeInTwoBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1162" started-at="2015-06-30T22:55:30Z" finished-at="2015-06-30T22:55:32Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1185" started-at="2015-07-24T00:43:07Z" finished-at="2015-07-24T00:43:08Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWitOneBucketOrderByASC()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWitOneBucketOrderByASC" duration-ms="26" started-at="2015-06-30T22:55:32Z" finished-at="2015-06-30T22:55:32Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWitOneBucketOrderByASC()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWitOneBucketOrderByASC" duration-ms="28" started-at="2015-07-24T00:43:08Z" finished-at="2015-07-24T00:43:08Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataByGaugeWitOneBucketOrderByASC -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1109" started-at="2015-06-30T22:55:32Z" finished-at="2015-06-30T22:55:33Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="968" started-at="2015-07-24T00:43:08Z" finished-at="2015-07-24T00:43:09Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithOneBucket" duration-ms="9" started-at="2015-06-30T22:55:33Z" finished-at="2015-06-30T22:55:33Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithOneBucket" duration-ms="17" started-at="2015-07-24T00:43:09Z" finished-at="2015-07-24T00:43:09Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataByGaugeWithOneBucket -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1010" started-at="2015-06-30T22:55:33Z" finished-at="2015-06-30T22:55:34Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="935" started-at="2015-07-24T00:43:09Z" finished-at="2015-07-24T00:43:10Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithThreeBuckets" duration-ms="31" started-at="2015-06-30T22:55:34Z" finished-at="2015-06-30T22:55:34Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithThreeBuckets" duration-ms="10" started-at="2015-07-24T00:43:10Z" finished-at="2015-07-24T00:43:10Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataByGaugeWithThreeBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1348" started-at="2015-06-30T22:55:34Z" finished-at="2015-06-30T22:55:35Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="983" started-at="2015-07-24T00:43:10Z" finished-at="2015-07-24T00:43:11Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithThreeBucketsOrderByASC()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithThreeBucketsOrderByASC" duration-ms="18" started-at="2015-06-30T22:55:35Z" finished-at="2015-06-30T22:55:35Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithThreeBucketsOrderByASC()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithThreeBucketsOrderByASC" duration-ms="8" started-at="2015-07-24T00:43:11Z" finished-at="2015-07-24T00:43:11Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataByGaugeWithThreeBucketsOrderByASC -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="977" started-at="2015-06-30T22:55:35Z" finished-at="2015-06-30T22:55:36Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1090" started-at="2015-07-24T00:43:11Z" finished-at="2015-07-24T00:43:12Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithTwoBuckets" duration-ms="14" started-at="2015-06-30T22:55:36Z" finished-at="2015-06-30T22:55:36Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithTwoBuckets" duration-ms="9" started-at="2015-07-24T00:43:12Z" finished-at="2015-07-24T00:43:12Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataByGaugeWithTwoBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="933" started-at="2015-06-30T22:55:36Z" finished-at="2015-06-30T22:55:37Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="876" started-at="2015-07-24T00:43:12Z" finished-at="2015-07-24T00:43:13Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithTwoBucketsOrderByASC()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithTwoBucketsOrderByASC" duration-ms="25" started-at="2015-06-30T22:55:37Z" finished-at="2015-06-30T22:55:37Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataByGaugeWithTwoBucketsOrderByASC()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataByGaugeWithTwoBucketsOrderByASC" duration-ms="7" started-at="2015-07-24T00:43:13Z" finished-at="2015-07-24T00:43:13Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataByGaugeWithTwoBucketsOrderByASC -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1421" started-at="2015-06-30T22:55:37Z" finished-at="2015-06-30T22:55:38Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="927" started-at="2015-07-24T00:43:13Z" finished-at="2015-07-24T00:43:14Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithOneBucket" duration-ms="7" started-at="2015-06-30T22:55:38Z" finished-at="2015-06-30T22:55:38Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithOneBucket()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithOneBucket" duration-ms="5" started-at="2015-07-24T00:43:14Z" finished-at="2015-07-24T00:43:14Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataWithOneBucket -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1656" started-at="2015-06-30T22:55:38Z" finished-at="2015-06-30T22:55:40Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1014" started-at="2015-07-24T00:43:14Z" finished-at="2015-07-24T00:43:15Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithOneBucketWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithOneBucketWithWriteTime" duration-ms="13" started-at="2015-06-30T22:55:40Z" finished-at="2015-06-30T22:55:40Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithOneBucketWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithOneBucketWithWriteTime" duration-ms="6" started-at="2015-07-24T00:43:15Z" finished-at="2015-07-24T00:43:15Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataWithOneBucketWithWriteTime -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1199" started-at="2015-06-30T22:55:40Z" finished-at="2015-06-30T22:55:41Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="846" started-at="2015-07-24T00:43:15Z" finished-at="2015-07-24T00:43:15Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithThreeBuckets" duration-ms="23" started-at="2015-06-30T22:55:41Z" finished-at="2015-06-30T22:55:41Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithThreeBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithThreeBuckets" duration-ms="13" started-at="2015-07-24T00:43:15Z" finished-at="2015-07-24T00:43:15Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataWithThreeBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1231" started-at="2015-06-30T22:55:41Z" finished-at="2015-06-30T22:55:43Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="963" started-at="2015-07-24T00:43:15Z" finished-at="2015-07-24T00:43:16Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithThreeBucketsWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithThreeBucketsWithWriteTime" duration-ms="37" started-at="2015-06-30T22:55:43Z" finished-at="2015-06-30T22:55:43Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithThreeBucketsWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithThreeBucketsWithWriteTime" duration-ms="13" started-at="2015-07-24T00:43:16Z" finished-at="2015-07-24T00:43:16Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataWithThreeBucketsWithWriteTime -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1274" started-at="2015-06-30T22:55:43Z" finished-at="2015-06-30T22:55:44Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="963" started-at="2015-07-24T00:43:16Z" finished-at="2015-07-24T00:43:17Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithTwoBuckets" duration-ms="15" started-at="2015-06-30T22:55:44Z" finished-at="2015-06-30T22:55:44Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithTwoBuckets()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithTwoBuckets" duration-ms="12" started-at="2015-07-24T00:43:17Z" finished-at="2015-07-24T00:43:17Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataWithTwoBuckets -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1211" started-at="2015-06-30T22:55:44Z" finished-at="2015-06-30T22:55:45Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="795" started-at="2015-07-24T00:43:17Z" finished-at="2015-07-24T00:43:18Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithTwoBucketsWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithTwoBucketsWithWriteTime" duration-ms="12" started-at="2015-06-30T22:55:45Z" finished-at="2015-06-30T22:55:45Z">
+        <test-method status="PASS" signature="insertAndFindGaugeRawDataWithTwoBucketsWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindGaugeRawDataWithTwoBucketsWithWriteTime" duration-ms="9" started-at="2015-07-24T00:43:18Z" finished-at="2015-07-24T00:43:18Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindGaugeRawDataWithTwoBucketsWithWriteTime -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="2758" started-at="2015-06-30T22:55:45Z" finished-at="2015-06-30T22:55:48Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="908" started-at="2015-07-24T00:43:18Z" finished-at="2015-07-24T00:43:19Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindSingleGaugeData()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindSingleGaugeData" duration-ms="22" started-at="2015-06-30T22:55:48Z" finished-at="2015-06-30T22:55:48Z">
+        <test-method status="PASS" signature="insertAndFindSingleGaugeData()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindSingleGaugeData" duration-ms="13" started-at="2015-07-24T00:43:19Z" finished-at="2015-07-24T00:43:19Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindSingleGaugeData -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1127" started-at="2015-06-30T22:55:48Z" finished-at="2015-06-30T22:55:49Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="794" started-at="2015-07-24T00:43:19Z" finished-at="2015-07-24T00:43:20Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindSingleGaugeDataWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindSingleGaugeDataWithWriteTime" duration-ms="19" started-at="2015-06-30T22:55:49Z" finished-at="2015-06-30T22:55:49Z">
+        <test-method status="PASS" signature="insertAndFindSingleGaugeDataWithWriteTime()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindSingleGaugeDataWithWriteTime" duration-ms="10" started-at="2015-07-24T00:43:20Z" finished-at="2015-07-24T00:43:20Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindSingleGaugeDataWithWriteTime -->
-        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="2879" started-at="2015-06-30T22:55:49Z" finished-at="2015-06-30T22:55:52Z">
+        <test-method status="PASS" signature="initMethod()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="initMethod" is-config="true" duration-ms="1044" started-at="2015-07-24T00:43:20Z" finished-at="2015-07-24T00:43:21Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- initMethod -->
-        <test-method status="PASS" signature="insertAndFindTenant()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindTenant" duration-ms="81" started-at="2015-06-30T22:55:52Z" finished-at="2015-06-30T22:55:52Z">
+        <test-method status="PASS" signature="insertAndFindTenant()[pri:0, instance:org.hawkular.metrics.core.impl.DataAccessITest2@35851384]" name="insertAndFindTenant" duration-ms="28" started-at="2015-07-24T00:43:21Z" finished-at="2015-07-24T00:43:21Z">
           <reporter-output>
           </reporter-output>
         </test-method> <!-- insertAndFindTenant -->

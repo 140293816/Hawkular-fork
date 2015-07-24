@@ -29,6 +29,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -47,17 +48,20 @@ import org.testng.annotations.Test;
 
 import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import rx.Observable;
+import rx.Observer;
 
 /**
  * @author John Sanda
  */
 public class DataAccessITest2 extends MetricsITest {
 
-    private DataAccessImpl2 dataAccess;
+    private DataAccessImpl3 dataAccess;
 
     private PreparedStatement truncateTenants;
 
@@ -70,7 +74,7 @@ public class DataAccessITest2 extends MetricsITest {
     @BeforeClass
     public void initClass() {
         initSession();
-        dataAccess = new DataAccessImpl2(session);
+        dataAccess = new DataAccessImpl3(session);
         truncateTenants = session.prepare("TRUNCATE tenants");
         truncateGaugeData = session.prepare("TRUNCATE data");
     }
@@ -126,9 +130,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
                 start.getMillis(), now().getMillis(), true);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -139,9 +143,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
                 start.getMillis(), now().getMillis(), true);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -152,9 +156,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
                 start.getMillis(), now().getMillis(), true);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -165,9 +169,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
                 start.getMillis(), now().getMillis());
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -178,9 +182,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
                 start.getMillis(), now().getMillis());
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -191,9 +195,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData("tenant-1", new MetricId("metric-1"), GAUGE,
                 start.getMillis(), now().getMillis());
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -204,9 +208,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData(metric,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData(metric,
                 start.getMillis(), now().getMillis(), Order.DESC);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -217,9 +221,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData(metric,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData(metric,
                 start.getMillis(), now().getMillis(), Order.DESC);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -230,9 +234,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData(metric,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData(metric,
                 start.getMillis(), now().getMillis(), Order.DESC);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -243,9 +247,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData(metric,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData(metric,
                 start.getMillis(), now().getMillis(), Order.ASC);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -256,9 +260,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData(metric,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData(metric,
                 start.getMillis(), now().getMillis(), Order.ASC);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -269,9 +273,9 @@ public class DataAccessITest2 extends MetricsITest {
         Metric<Double> metric = new Metric<>("tenant-1", GAUGE, new MetricId("metric-1"), list);
 
         dataAccess.insertData(metric, DEFAULT_TTL).toBlocking().last();
-        List<Observable<ResultSet>> observable = dataAccess.findData(metric,
+        ListenableFuture<List<ResultSet>> future = dataAccess.findData(metric,
                 start.getMillis(), now().getMillis(), Order.ASC);
-        List<DataPoint<Double>> actual = sortGaugeData(observable);
+        List<DataPoint<Double>> actual = sortGaugeData(future);
         assertEquals(actual, list, "The data does not match the expected values");
     }
 
@@ -321,8 +325,8 @@ public class DataAccessITest2 extends MetricsITest {
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
                 .findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(), now().getMillis()));
-
         assertEquals(actual, list, "The availability data does not match the expected values");
+
     }
 
     @Test
@@ -337,7 +341,6 @@ public class DataAccessITest2 extends MetricsITest {
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
                 .findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(), now().getMillis()));
-
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -353,7 +356,6 @@ public class DataAccessITest2 extends MetricsITest {
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
                 .findAvailabilityData(tenantId, new MetricId("m1"), start.getMillis(), now().getMillis()));
-
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -369,7 +371,6 @@ public class DataAccessITest2 extends MetricsITest {
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
                 .findAvailabilityData(metric, start.getMillis(), now().getMillis()));
-
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -385,7 +386,6 @@ public class DataAccessITest2 extends MetricsITest {
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
                 .findAvailabilityData(metric, start.getMillis(), now().getMillis()));
-
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -401,7 +401,6 @@ public class DataAccessITest2 extends MetricsITest {
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
                 .findAvailabilityData(metric, start.getMillis(), now().getMillis()));
-
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -417,7 +416,6 @@ public class DataAccessITest2 extends MetricsITest {
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
                 .findAvailabilityData(metric, start.getMillis(), now().getMillis(), true));
-
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -432,8 +430,7 @@ public class DataAccessITest2 extends MetricsITest {
         dataAccess.insertAvailabilityData(metric, 360).toBlocking().lastOrDefault(null);
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
-                .findAvailabilityData(metric, start.getMillis(), now().getMillis(), true));
-
+                .findAvailabilityData(metric, start.getMillis(), now().getMillis(),true));
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -448,8 +445,7 @@ public class DataAccessITest2 extends MetricsITest {
         dataAccess.insertAvailabilityData(metric, 360).toBlocking().lastOrDefault(null);
 
         List<DataPoint<AvailabilityType>> actual = sortAvailabilityData(dataAccess
-                .findAvailabilityData(metric, start.getMillis(), now().getMillis(), true));
-
+                .findAvailabilityData(metric, start.getMillis(), now().getMillis(),true));
         assertEquals(actual, list, "The availability data does not match the expected values");
     }
 
@@ -501,28 +497,27 @@ public class DataAccessITest2 extends MetricsITest {
         return list;
     }
 
-    private List<DataPoint<Double>> sortGaugeData(List<Observable<ResultSet>> queryFuture) throws Exception {
-        List<DataPoint<Double>> result = new ArrayList<DataPoint<Double>>();
-        for (Observable<ResultSet> i : queryFuture) {
-            result.addAll(i
-                    .flatMap(Observable::from)
-                    .map(Functions::getGaugeDataPoint)
-                    .toList().toBlocking().lastOrDefault(null));
+    private List<DataPoint<Double>> sortGaugeData(ListenableFuture<List<ResultSet>> future) throws Exception {
+        List<DataPoint<Double>> results = new ArrayList<DataPoint<Double>>();
+        for(ResultSet i: future.get()){
+            Iterator<Row> it = i.iterator();
+            while(it.hasNext()){
+                results.add(Functions.getGaugeDataPoint(it.next()));
+            }
         }
-        return result;
+        return results;
+
     }
-
-    private List<DataPoint<AvailabilityType>> sortAvailabilityData(List<Observable<ResultSet>> queryFuture)
+    private List<DataPoint<AvailabilityType>> sortAvailabilityData(ListenableFuture<List<ResultSet>> future)
             throws Exception {
-        List<DataPoint<AvailabilityType>> result = new ArrayList<DataPoint<AvailabilityType>>();
-        for (Observable<ResultSet> i : queryFuture) {
-            result.addAll(i
-                    .flatMap(Observable::from)
-                    .map(Functions::getAvailabilityDataPoint)
-                    .toList().toBlocking().lastOrDefault(null));
+        List<DataPoint<AvailabilityType>> results = new ArrayList<DataPoint<AvailabilityType>>();
+        for(ResultSet i: future.get()){
+            Iterator<Row> it = i.iterator();
+            while(it.hasNext()){
+                results.add(Functions.getAvailabilityDataPoint(it.next()));
+            }
         }
-
-        return result;
+        return results;
     }
 
 }

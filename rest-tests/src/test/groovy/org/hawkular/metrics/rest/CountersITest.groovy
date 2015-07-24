@@ -15,17 +15,57 @@
  * limitations under the License.
  */
 package org.hawkular.metrics.rest
-
+import org.hawkular.metrics.core.impl.DateTimeService
 import org.joda.time.DateTime
+import org.joda.time.Duration
 import org.junit.Test
 
 import static org.joda.time.DateTime.now
 import static org.junit.Assert.assertEquals
 
 /**
- *
+ * @author John Sanda
  */
 class CountersITest extends RESTTest {
+
+  @Test
+  void shouldNotCreateMetricWithEmptyPayload() {
+    def tenantId = nextTenantId()
+
+    badPost(path: "counters", headers: [(tenantHeaderName): tenantId], body: "" /* Empty Body */) { exception ->
+      assertEquals(400, exception.response.status)
+    }
+  }
+
+  @Test
+  void shouldNotAddDataForCounterWithEmptyPayload() {
+    def tenantId = nextTenantId()
+
+    badPost(path: "counters/pimpo/data", headers: [(tenantHeaderName): tenantId],
+        body: "" /* Empty Body */) { exception ->
+      assertEquals(400, exception.response.status)
+    }
+
+    badPost(path: "counters/pimpo/data", headers: [(tenantHeaderName): tenantId],
+        body: [] /* Empty List */) { exception ->
+      assertEquals(400, exception.response.status)
+    }
+  }
+
+  @Test
+  void shouldNotAddDataWithEmptyPayload() {
+    def tenantId = nextTenantId()
+
+    badPost(path: "counters/data", headers: [(tenantHeaderName): tenantId],
+        body: "" /* Empty Body */) { exception ->
+      assertEquals(400, exception.response.status)
+    }
+
+    badPost(path: "counters/data", headers: [(tenantHeaderName): tenantId],
+        body: [] /* Empty List */) { exception ->
+      assertEquals(400, exception.response.status)
+    }
+  }
 
   @Test
   void createSimpleCounter() {
@@ -44,6 +84,23 @@ class CountersITest extends RESTTest {
 
     def expectedData = [tenantId: tenantId, id: id]
     assertEquals(expectedData, response.data)
+  }
+
+  @Test
+  void shouldNotCreateDuplicateCounter() {
+    String tenantId = nextTenantId()
+    String id = "C1"
+
+    def response = hawkularMetrics.post(
+        path: "counters",
+        headers: [(tenantHeaderName): tenantId],
+        body: [id: id]
+    )
+    assertEquals(201, response.status)
+
+    badPost(path: 'counters', headers: [(tenantHeaderName): tenantId], body: [id: id]) { exception ->
+      assertEquals(409, exception.response.status)
+    }
   }
 
   @Test
@@ -160,7 +217,6 @@ class CountersITest extends RESTTest {
     assertEquals(200, response.status)
 
     def expectedData = [
-        [timestamp: start.plusMinutes(1).millis, value: 20],
         [timestamp: start.millis, value: 10]
     ]
     assertEquals(expectedData, response.data)
@@ -168,7 +224,7 @@ class CountersITest extends RESTTest {
     response = hawkularMetrics.get(
         path: "counters/$counter2/data",
         headers: [(tenantHeaderName): tenantId],
-        query: [start: start.millis, end: start.plusMinutes(1).millis]
+        query: [start: start.millis, end: start.plusMinutes(2).millis]
     )
     assertEquals(200, response.status)
 
@@ -247,6 +303,70 @@ class CountersITest extends RESTTest {
         headers: [(tenantHeaderName): tenantId]
     )
     assertEquals(204, response.status)
+  }
+
+  @Test
+  void findRate() {
+    String tenantId = nextTenantId()
+    String counter = "C1"
+    DateTimeService dateTimeService = new DateTimeService()
+    DateTime start = dateTimeService.getTimeSlice(now(), Duration.standardSeconds(5)).plusSeconds(5)
+
+    def response = hawkularMetrics.post(
+        path: "counters",
+        headers: [(tenantHeaderName): tenantId],
+        body: [id: counter]
+    )
+    assertEquals(201, response.status)
+
+    response = hawkularMetrics.post(
+        path: "counters/$counter/data",
+        headers: [(tenantHeaderName): tenantId],
+        body: [
+            [timestamp: start.millis, value: 100],
+            [timestamp: start.plusSeconds(1).millis, value : 200],
+            [timestamp: start.plusSeconds(3).millis, value : 345],
+            [timestamp: start.plusSeconds(5).millis, value : 515],
+            [timestamp: start.plusSeconds(7).millis, value : 595],
+            [timestamp: start.plusSeconds(9).millis, value : 747]
+        ]
+    )
+    assertEquals(200, response.status)
+
+    while (now().isBefore(start.plusSeconds(20))) {
+      Thread.sleep(100)
+    }
+
+    response = hawkularMetrics.get(
+        path: "counters/$counter/rate",
+        headers: [(tenantHeaderName): tenantId],
+        query: [start: start.millis, end: start.plusSeconds(10).millis]
+    )
+    assertEquals(200, response.status)
+
+    def expectedData = [
+        [
+            timestamp: start.plusSeconds(5).millis,
+            value: calculateRate(747, start.plusSeconds(5), start.plusSeconds(10))
+        ],
+        [
+            timestamp: start.millis,
+            value: calculateRate(345, start, start.plusSeconds(5))
+        ],
+    ]
+
+    assertEquals("Expected to get back two data points", 2, response.data.size())
+    assertRateEquals(expectedData[0], response.data[0])
+    assertRateEquals(expectedData[1], response.data[1])
+  }
+
+  static double calculateRate(double value, DateTime start, DateTime end) {
+    return (value / (end.millis - start.millis)) * 1000.0
+  }
+
+  static void assertRateEquals(def expected, def actual) {
+    assertEquals("The timestamp does not match the expected value", expected.timestamp, actual.timestamp)
+    assertDoubleEquals(expected.value, actual.value)
   }
 
 }

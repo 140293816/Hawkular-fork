@@ -16,8 +16,8 @@
  */
 package org.hawkular.metrics.core.impl;
 
-import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparingLong;
+
 import static org.hawkular.metrics.core.api.MetricType.COUNTER;
 import static org.hawkular.metrics.core.api.MetricType.COUNTER_RATE;
 import static org.hawkular.metrics.core.api.MetricType.GAUGE;
@@ -39,7 +39,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.hawkular.metrics.core.api.AvailabilityBucketDataPoint;
@@ -460,10 +459,24 @@ public class MetricsServiceImpl implements MetricsService {
 
     @Override
     public Observable<Metric> findMetrics(String tenantId, MetricType type) {
-        return dataAccess.findMetricsInMetricsIndex(tenantId, type)
+        Observable<MetricType> typeObservable = (type == null) ? Observable.from(MetricType.userTypes()) :
+                Observable.just(type);
+
+        return typeObservable.flatMap(t -> dataAccess.findMetricsInMetricsIndex(tenantId, t))
                 .flatMap(Observable::from)
                 .map(row -> new Metric(tenantId, type, new MetricId(row.getString(0), Interval.parse(row.getString(1))),
                         row.getMap(2, String.class, String.class), row.getInt(3)));
+    }
+
+    @Override
+    public Observable<Metric> findMetricsWithTags(String tenantId, Map<String, String> tags, MetricType type) {
+        return dataAccess.findMetricsFromTagsIndex(tenantId, tags)
+                .flatMap(Observable::from)
+                .filter(r -> (type == null && MetricType.userTypes().contains(MetricType.fromCode(r.getInt(0))))
+                        || MetricType.fromCode(r.getInt(0)) == type)
+                .distinct(r -> Integer.valueOf(r.getInt(0)).toString() + r.getString(1) + r.getString(2))
+                .flatMap(r -> findMetric(tenantId, MetricType.fromCode(r.getInt(0)), new MetricId(r.getString
+                        (1), Interval.parse(r.getString(2)))));
     }
 
     @Override
@@ -527,9 +540,8 @@ public class MetricsServiceImpl implements MetricsService {
     }
 
     @Override
-    public Observable<Void> addAvailabilityData(List<Metric<AvailabilityType>> metrics) {
+    public Observable<Void> addAvailabilityData(Observable<Metric<AvailabilityType>> availabilities) {
         PublishSubject<Void> results = PublishSubject.create();
-        Observable<Metric<AvailabilityType>> availabilities = Observable.from(metrics);
         Observable<Integer> updates = availabilities
                 .filter(a -> !a.getDataPoints().isEmpty())
                 .flatMap(a -> dataAccess.insertAvailabilityData(a, getTTL(a)));
@@ -801,27 +813,4 @@ public class MetricsServiceImpl implements MetricsService {
             throw new RuntimeException("There was an error during a timed event", e);
         }
     }
-
-    private Consumer<Task> generateRate() {
-        return task -> {
-            logger.info("Generating rate for {}", task);
-            // TODO Store tenant id with task
-            MetricId id = new MetricId(task.getSources().iterator().next());
-            long end = task.getTimeSlice().getMillis();
-            long start = task.getTimeSlice().minusSeconds(task.getWindow()).getMillis();
-            logger.debug("start = {}, end = {}", start, end);
-            findCounterData(task.getTenantId(), id, start, end)
-                    .take(1)
-                    .map(dataPoint -> ((dataPoint.getValue().doubleValue() / (end - start) * 1000)))
-                    .map(rate -> new Metric<>(task.getTenantId(), COUNTER_RATE, id,
-                            singletonList(new DataPoint<>(start, rate))))
-                    .flatMap(metric -> addGaugeData(Observable.just(metric)))
-                    .subscribe(
-                            aVoid -> {},
-                            t -> logger.warn("Failed to persist rate data", t),
-                            () -> logger.debug("Successfully persisted rate data")
-                    );
-        };
-    }
-
 }

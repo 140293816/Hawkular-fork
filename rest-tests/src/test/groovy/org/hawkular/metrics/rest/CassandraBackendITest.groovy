@@ -355,19 +355,19 @@ class CassandraBackendITest extends RESTTest {
   void findMetricsShouldFailProperlyWhenTypeIsMissingOrInvalid() {
     def tenantId = nextTenantId()
 
-    badGet(path: "metrics",
-        headers: [(tenantHeaderName): tenantId]) { exception ->
-      // Missing type
-      assertEquals(400, exception.response.status)
-      assertEquals("Missing type param", exception.response.data["errorMsg"])
-    }
-
     def invalidType = MetricType.values().join('"')
     badGet(path: "metrics", query: [type: invalidType],
         headers: [(tenantHeaderName): tenantId]) { exception ->
       // Invalid type
       assertEquals(400, exception.response.status)
       assertEquals(invalidType + " is not a recognized metric type", exception.response.data["errorMsg"])
+    }
+
+    badGet(path: "metrics", query: [type: MetricType.COUNTER_RATE.toString()],
+        headers: [(tenantHeaderName): tenantId]) { exception ->
+      // Not user definable type
+      assertEquals(400, exception.response.status)
+      assertEquals("Incorrect type param", exception.response.data["errorMsg"])
     }
 
     def response = hawkularMetrics.get(path: "metrics", query: [type: MetricType.GAUGE.text],
@@ -544,5 +544,24 @@ class CassandraBackendITest extends RESTTest {
     expected.n4.eachWithIndex { expectedDataPoint, i ->
       assertGaugeDataPointEquals(expectedDataPoint, response.data.n4[i])
     }
+  }
+
+  @Test
+  void createEmptyMetric() {
+    String tenantId = nextTenantId()
+
+    // Create a gauge metric
+    def response = hawkularMetrics.post(path: "gauges", body: [
+            id: 'Empty1'
+    ], headers: [(tenantHeaderName): tenantId])
+    assertEquals(201, response.status)
+
+    // Fetch the metric
+    response = hawkularMetrics.get(path: "gauges/Empty1", headers: [(tenantHeaderName): tenantId])
+    assertEquals(200, response.status)
+    assertEquals([
+            tenantId: tenantId,
+            id: 'Empty1'
+    ], response.data)
   }
 }
