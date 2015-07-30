@@ -37,8 +37,7 @@ public class Solution1 {
     }
 
     public static void main(String[] args) {
-//        int num = Integer.valueOf(args[0]);
-        int num =9;
+        int num = Integer.valueOf(args[0]);
         final MetricRegistry metricRegistry = new MetricRegistry();
         final CsvReporter reporter = CsvReporter.forRegistry(metricRegistry)
                 .formatFor(Locale.US)

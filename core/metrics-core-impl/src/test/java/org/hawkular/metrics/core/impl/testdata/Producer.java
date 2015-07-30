@@ -10,10 +10,8 @@ import com.codahale.metrics.MetricRegistry;
 
 public class Producer {
     public static void main(String[] args) throws InterruptedException {
-//        int num = Integer.valueOf(args[0]);
-//        int rowWidth = Integer.valueOf(args[1]);
-        int num = 9;
-        int rowWidth = 2000;
+        int num = Integer.valueOf(args[0]);
+        int rowWidth = Integer.valueOf(args[1]);
         final MetricRegistry metricRegistry = new MetricRegistry();
         final Meter meter = metricRegistry.meter("throughput");
         final ConsoleReporter reporter = ConsoleReporter.forRegistry(metricRegistry)

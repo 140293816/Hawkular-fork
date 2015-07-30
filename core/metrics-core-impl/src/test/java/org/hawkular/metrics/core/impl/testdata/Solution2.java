@@ -12,9 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.hawkular.metrics.core.api.Metric;
 import org.hawkular.metrics.core.api.MetricId;
-import org.hawkular.metrics.core.impl.DataAccessImpl2;
 import org.hawkular.metrics.core.impl.DataAccessImpl3;
-import org.hawkular.metrics.core.impl.Functions;
 import org.hawkular.metrics.core.impl.Order;
 import org.joda.time.DateTime;
 
@@ -26,11 +24,7 @@ import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
-
-import rx.Observable;
-import rx.Observer;
 
 public class Solution2 {
     private static final Cluster cluster;
@@ -45,8 +39,7 @@ public class Solution2 {
     }
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        //                int num = Integer.valueOf(args[0]);
-        int num = 9;
+                        int num = Integer.valueOf(args[0]);
         final MetricRegistry metricRegistry = new MetricRegistry();
         final CsvReporter reporter = CsvReporter.forRegistry(metricRegistry)
                 .formatFor(Locale.US)
