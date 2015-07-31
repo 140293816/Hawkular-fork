@@ -61,7 +61,7 @@ import rx.Observer;
  */
 public class DataAccessITest2 extends MetricsITest {
 
-    private DataAccessImpl3 dataAccess;
+    private DataAccessImpl2 dataAccess;
 
     private PreparedStatement truncateTenants;
 
@@ -74,7 +74,7 @@ public class DataAccessITest2 extends MetricsITest {
     @BeforeClass
     public void initClass() {
         initSession();
-        dataAccess = new DataAccessImpl3(session);
+        dataAccess = new DataAccessImpl2(session);
         truncateTenants = session.prepare("TRUNCATE tenants");
         truncateGaugeData = session.prepare("TRUNCATE data");
     }

@@ -55,17 +55,16 @@ import com.datastax.driver.core.TupleValue;
 import com.datastax.driver.core.UDTValue;
 import com.datastax.driver.core.UserType;
 import com.datastax.driver.core.utils.UUIDs;
-import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
-import rx.schedulers.Schedulers;
-import rx.Scheduler;
 import rx.Observable;
 
 /**
  *
  * @author John Sanda
  */
-public class DataAccessImpl2 implements DataAccess {
+public class DataAccessImpl2 {
 
     public static final long DPART = 0;
     private static final long timeSpan = 1814400000L;
@@ -157,190 +156,198 @@ public class DataAccessImpl2 implements DataAccess {
 
     protected void initPreparedStatements() {
         insertTenant = session.prepare(
-            "INSERT INTO tenants (id, retentions, aggregation_templates) " +
-            "VALUES (?, ?, ?) " +
-            "IF NOT EXISTS");
+                "INSERT INTO tenants (id, retentions, aggregation_templates) " +
+                        "VALUES (?, ?, ?) " +
+                        "IF NOT EXISTS");
 
         findAllTenantIds = session.prepare("SELECT DISTINCT id FROM tenants");
 
         findTenant = session.prepare("SELECT id, retentions, aggregation_templates FROM tenants WHERE id = ?");
 
         findMetric = session.prepare(
-            "SELECT metric, interval, tags, data_retention " +
-            "FROM metrics_idx " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ?");
+                "SELECT metric, interval, tags, data_retention " +
+                        "FROM metrics_idx " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ?");
 
         getMetricTags = session.prepare(
                 "SELECT m_tags " +
-                "FROM data " +
-                "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+                        "FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
 
         addMetricTagsToDataTable = session.prepare(
-            "UPDATE data " +
-            "SET m_tags = m_tags + ? " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+                "UPDATE data " +
+                        "SET m_tags = m_tags + ? " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
 
         // TODO I am not sure if we want the m_tags and data_retention columns in the data table
         // Everything else in a partition will have a TTL set on it, so I fear that these columns
         // might cause problems with compaction.
         addMetadataAndDataRetention = session.prepare(
-            "UPDATE data " +
-            "SET m_tags = m_tags + ?, data_retention = ? " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+                "UPDATE data " +
+                        "SET m_tags = m_tags + ?, data_retention = ? " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
 
         deleteMetricTagsFromDataTable = session.prepare(
-            "UPDATE data " +
-            "SET m_tags = m_tags - ? " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+                "UPDATE data " +
+                        "SET m_tags = m_tags - ? " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
 
         insertIntoMetricsIndex = session.prepare(
-            "INSERT INTO metrics_idx (tenant_id, type, interval, metric, data_retention, tags) " +
-            "VALUES (?, ?, ?, ?, ?, ?) " +
-            "IF NOT EXISTS");
+                "INSERT INTO metrics_idx (tenant_id, type, interval, metric, data_retention, tags) " +
+                        "VALUES (?, ?, ?, ?, ?, ?) " +
+                        "IF NOT EXISTS");
 
         updateMetricsIndex = session.prepare(
-            "INSERT INTO metrics_idx (tenant_id, type, interval, metric) VALUES (?, ?, ?, ?)");
+                "INSERT INTO metrics_idx (tenant_id, type, interval, metric) VALUES (?, ?, ?, ?)");
 
         addTagsToMetricsIndex = session.prepare(
-            "UPDATE metrics_idx " +
-            "SET tags = tags + ? " +
-            "WHERE tenant_id = ? AND type = ? AND interval = ? AND metric = ?");
+                "UPDATE metrics_idx " +
+                        "SET tags = tags + ? " +
+                        "WHERE tenant_id = ? AND type = ? AND interval = ? AND metric = ?");
 
         deleteTagsFromMetricsIndex = session.prepare(
-            "UPDATE metrics_idx " +
-            "SET tags = tags - ?" +
-            "WHERE tenant_id = ? AND type = ? AND interval = ? AND metric = ?");
+                "UPDATE metrics_idx " +
+                        "SET tags = tags - ?" +
+                        "WHERE tenant_id = ? AND type = ? AND interval = ? AND metric = ?");
 
         readMetricsIndex = session.prepare(
-            "SELECT metric, interval, tags, data_retention " +
-            "FROM metrics_idx " +
-            "WHERE tenant_id = ? AND type = ?");
+                "SELECT metric, interval, tags, data_retention " +
+                        "FROM metrics_idx " +
+                        "WHERE tenant_id = ? AND type = ?");
 
-        insertGaugeData = session.prepare(
-            "UPDATE data " +
-            "USING TTL ?" +
-            "SET m_tags = m_tags + ?, n_value = ? " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ? ");
+        insertGaugeData = session
+                .prepare(
+                "UPDATE data " +
+                        "USING TTL ?" +
+                        "SET m_tags = m_tags + ?, n_value = ? " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ? ");
 
-        insertCounterData = session.prepare(
-            "UPDATE data " +
-            "USING TTL ?" +
-            "SET m_tags = m_tags + ?, l_value = ? " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ? ");
+        insertCounterData = session
+                .prepare(
+                "UPDATE data " +
+                        "USING TTL ?" +
+                        "SET m_tags = m_tags + ?, l_value = ? " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ? ");
 
         findGaugeDataByDateRangeExclusive = session.prepare(
-            "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
-                + " AND time < ?");
+                "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        + " AND time < ?");
 
         findGaugeDataByDateRangeExclusiveASC = session.prepare(
-            "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?" +
-            " AND time < ? ORDER BY time ASC");
+                "SELECT time, m_tags, data_retention, n_value, tags FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        +
+                        " AND time < ? ORDER BY time ASC");
 
-        findCounterDataExclusive = session.prepare(
-            "SELECT time, m_tags, data_retention, l_value, tags FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ? " +
-            "AND time < ?");
+        findCounterDataExclusive = session
+                .prepare(
+                "SELECT time, m_tags, data_retention, l_value, tags FROM data "
+                        +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ? "
+                        +
+                        "AND time < ?");
 
         findGaugeDataWithWriteTimeByDateRangeExclusive = session.prepare(
-            "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
-                + " AND time < ?");
+                "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        + " AND time < ?");
 
         findGaugeDataByDateRangeInclusive = session.prepare(
-            "SELECT tenant_id, metric, interval, dpart, time, m_tags, data_retention, n_value, tags " +
-            "FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
-                + " AND time <= ?");
+                "SELECT tenant_id, metric, interval, dpart, time, m_tags, data_retention, n_value, tags " +
+                        "FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        + " AND time <= ?");
 
         findGaugeDataWithWriteTimeByDateRangeInclusive = session.prepare(
-            "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
-                + " AND time <= ?");
+                "SELECT time, m_tags, data_retention, n_value, tags, WRITETIME(n_value) FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        + " AND time <= ?");
 
         findAvailabilityByDateRangeInclusive = session.prepare(
-            "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
-                + " AND time <= ?");
+                "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        + " AND time <= ?");
 
         deleteGaugeMetric = session.prepare(
-            "DELETE FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
+                "DELETE FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ?");
 
         findGaugeMetrics = session.prepare(
-            "SELECT DISTINCT tenant_id, type, metric, interval, dpart FROM data;");
+                "SELECT DISTINCT tenant_id, type, metric, interval, dpart FROM data;");
 
         insertGaugeTags = session.prepare(
-            "INSERT INTO tags (tenant_id, tname, tvalue, type, metric, interval, time, n_value) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
-            "USING TTL ?");
+                "INSERT INTO tags (tenant_id, tname, tvalue, type, metric, interval, time, n_value) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
+                        "USING TTL ?");
 
         insertAvailabilityTags = session.prepare(
-            "INSERT INTO tags (tenant_id, tname, tvalue, type, metric, interval, time, availability) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
-            "USING TTL ?");
+                "INSERT INTO tags (tenant_id, tname, tvalue, type, metric, interval, time, availability) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?) " +
+                        "USING TTL ?");
 
         updateDataWithTags = session.prepare(
-            "UPDATE data " +
-            "SET tags = tags + ? " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ?");
+                "UPDATE data " +
+                        "SET tags = tags + ? " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ?");
 
         findGaugeDataByTag = session.prepare(
-            "SELECT tenant_id, tname, tvalue, type, metric, interval, time, n_value " +
-            "FROM tags " +
-            "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
+                "SELECT tenant_id, tname, tvalue, type, metric, interval, time, n_value " +
+                        "FROM tags " +
+                        "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
 
         findAvailabilityByTag = session.prepare(
-            "SELECT tenant_id, tname, tvalue, type, metric, interval, time, availability " +
-            "FROM tags " +
-            "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
+                "SELECT tenant_id, tname, tvalue, type, metric, interval, time, availability " +
+                        "FROM tags " +
+                        "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
 
         insertAvailability = session.prepare(
-            "UPDATE data " +
-            "USING TTL ? " +
-            "SET m_tags = m_tags + ?, availability = ? " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ?");
+                "UPDATE data " +
+                        "USING TTL ? " +
+                        "SET m_tags = m_tags + ?, availability = ? " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time = ?");
 
         findAvailabilities = session.prepare(
-            "SELECT time, m_tags, data_retention, availability, tags FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
-                + " AND time < ? " +
-            "ORDER BY time ASC");
+                "SELECT time, m_tags, data_retention, availability, tags FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        + " AND time < ? " +
+                        "ORDER BY time ASC");
 
         findAvailabilitiesWithWriteTime = session.prepare(
-            "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data " +
-            "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?" +
-                    " AND time < ?");
+                "SELECT time, m_tags, data_retention, availability, tags, WRITETIME(availability) FROM data " +
+                        "WHERE tenant_id = ? AND type = ? AND metric = ? AND interval = ? AND dpart = ? AND time >= ?"
+                        +
+                        " AND time < ?");
 
         updateRetentionsIndex = session.prepare(
-            "INSERT INTO retentions_idx (tenant_id, type, interval, metric, retention) VALUES (?, ?, ?, ?, ?)");
+                "INSERT INTO retentions_idx (tenant_id, type, interval, metric, retention) VALUES (?, ?, ?, ?, ?)");
 
         findDataRetentions = session.prepare(
-            "SELECT tenant_id, type, interval, metric, retention " +
-            "FROM retentions_idx " +
-            "WHERE tenant_id = ? AND type = ?");
+                "SELECT tenant_id, type, interval, metric, retention " +
+                        "FROM retentions_idx " +
+                        "WHERE tenant_id = ? AND type = ?");
 
         insertMetricsTagsIndex = session.prepare(
-            "INSERT INTO metrics_tags_idx (tenant_id, tname, tvalue, type, metric, interval) VALUES " +
-            "(?, ?, ?, ?, ?, ?)");
+                "INSERT INTO metrics_tags_idx (tenant_id, tname, tvalue, type, metric, interval) VALUES " +
+                        "(?, ?, ?, ?, ?, ?)");
 
-        deleteMetricsTagsIndex = session.prepare(
-            "DELETE FROM metrics_tags_idx " +
-            "WHERE tenant_id = ? AND tname = ? AND tvalue = ? AND type = ? AND metric = ? AND interval = ?");
+        deleteMetricsTagsIndex = session
+                .prepare(
+                "DELETE FROM metrics_tags_idx "
+                        +
+                        "WHERE tenant_id = ? AND tname = ? AND tvalue = ? AND type = ? AND metric = ? AND interval = ?");
 
         findMetricsByTagName = session.prepare(
-            "SELECT tvalue, type, metric, interval " +
-            "FROM metrics_tags_idx " +
-            "WHERE tenant_id = ? AND tname = ?");
+                "SELECT tvalue, type, metric, interval " +
+                        "FROM metrics_tags_idx " +
+                        "WHERE tenant_id = ? AND tname = ?");
 
         findMetricsFromTagsIndex = session.prepare(
                 "SELECT type, metric, interval " +
                         "FROM metrics_tags_idx " +
-                        "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
+                "WHERE tenant_id = ? AND tname = ? AND tvalue = ?");
     }
 
-    @Override
     public Observable<ResultSet> insertTenant(Tenant tenant) {
         UserType aggregationTemplateType = getKeyspace().getUserType("aggregation_template");
         List<UDTValue> templateValues = new ArrayList<>(tenant.getAggregationTemplates().size());
@@ -368,29 +375,24 @@ public class DataAccessImpl2 implements DataAccess {
         return rxSession.execute(insertTenant.bind(tenant.getId(), retentions, templateValues));
     }
 
-    @Override
     public Observable<ResultSet> findAllTenantIds() {
         return rxSession.execute(findAllTenantIds.bind());
     }
 
-    @Override
     public Observable<ResultSet> findTenant(String id) {
         return rxSession.execute(findTenant.bind(id));
     }
 
-    @Override
     public ResultSetFuture insertMetricInMetricsIndex(Metric metric) {
         return session.executeAsync(insertIntoMetricsIndex.bind(metric.getTenantId(), metric.getType().getCode(),
                 metric.getId().getInterval().toString(), metric.getId().getName(), metric.getDataRetention(),
                 metric.getTags()));
     }
 
-    @Override
     public Observable<ResultSet> findMetric(String tenantId, MetricType type, MetricId id) {
         return rxSession.execute(findMetric.bind(tenantId, type.getCode(), id.getName(), id.getInterval().toString()));
     }
 
-    @Override
     public Observable<ResultSet> getMetricTags(String tenantId, MetricType type, MetricId id, long dpart) {
         return rxSession.execute(getMetricTags.bind(tenantId, type.getCode(), id.getName(), id.getInterval()
                 .toString(), dpart));
@@ -401,45 +403,42 @@ public class DataAccessImpl2 implements DataAccess {
     // will store metric tags and data retention in the data table. We would have to
     // determine when we start writing data to a new partition, e.g., the start of the next
     // day, and then add the tags and retention to the new partition.
-    @Override
+
     public Observable<ResultSet> addTagsAndDataRetention(Metric metric) {
         return rxSession.execute(addMetadataAndDataRetention.bind(metric.getTags(), metric.getDataRetention(),
-                metric.getTenantId(), metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval()
-                        .toString(), DPART));
+                metric.getTenantId(), metric.getType().getCode(), metric.getId().getName(), metric.getId()
+                        .getInterval()
+                .toString(), DPART));
     }
 
-    @Override
     public Observable<ResultSet> addTags(Metric metric, Map<String, String> tags) {
         BatchStatement batch = new BatchStatement(UNLOGGED);
         batch.add(addMetricTagsToDataTable.bind(tags, metric.getTenantId(), metric.getType().getCode(),
-            metric.getId().getName(), metric.getId().getInterval().toString(), DPART));
+                metric.getId().getName(), metric.getId().getInterval().toString(), DPART));
         batch.add(addTagsToMetricsIndex.bind(tags, metric.getTenantId(), metric.getType().getCode(),
-            metric.getId().getInterval().toString(), metric.getId().getName()));
+                metric.getId().getInterval().toString(), metric.getId().getName()));
         return rxSession.execute(batch);
     }
 
-    @Override
     public Observable<ResultSet> deleteTags(Metric metric, Set<String> tags) {
         BatchStatement batch = new BatchStatement(UNLOGGED);
         batch.add(deleteMetricTagsFromDataTable.bind(tags, metric.getTenantId(), metric.getType().getCode(),
-            metric.getId().getName(), metric.getId().getInterval().toString(), DPART));
+                metric.getId().getName(), metric.getId().getInterval().toString(), DPART));
         batch.add(deleteTagsFromMetricsIndex.bind(tags, metric.getTenantId(), metric.getType().getCode(),
-            metric.getId().getInterval().toString(), metric.getId().getName()));
+                metric.getId().getInterval().toString(), metric.getId().getName()));
         return rxSession.execute(batch);
     }
 
-    @Override
     public Observable<ResultSet> updateTagsInMetricsIndex(Metric metric, Map<String, String> additions,
             Set<String> deletions) {
         BatchStatement batchStatement = new BatchStatement(UNLOGGED)
-            .add(addTagsToMetricsIndex.bind(additions, metric.getTenantId(),
-                metric.getType().getCode(), metric.getId().getInterval().toString(), metric.getId().getName()))
-            .add(deleteTagsFromMetricsIndex.bind(deletions, metric.getTenantId(), metric.getType().getCode(),
-                    metric.getId().getInterval().toString(), metric.getId().getName()));
+                .add(addTagsToMetricsIndex.bind(additions, metric.getTenantId(),
+                        metric.getType().getCode(), metric.getId().getInterval().toString(), metric.getId().getName()))
+                .add(deleteTagsFromMetricsIndex.bind(deletions, metric.getTenantId(), metric.getType().getCode(),
+                        metric.getId().getInterval().toString(), metric.getId().getName()));
         return rxSession.execute(batchStatement);
     }
 
-    @Override
     public <T> ResultSetFuture updateMetricsIndex(List<Metric<T>> metrics) {
         BatchStatement batchStatement = new BatchStatement(UNLOGGED);
         for (Metric metric : metrics) {
@@ -449,7 +448,6 @@ public class DataAccessImpl2 implements DataAccess {
         return session.executeAsync(batchStatement);
     }
 
-    @Override
     public <T> Observable<Integer> updateMetricsIndexRx(Observable<Metric<T>> metrics) {
         return metrics.reduce(new BatchStatement(UNLOGGED), (batch, metric) -> {
             batch.add(updateMetricsIndex.bind(metric.getTenantId(), metric.getType().getCode(),
@@ -458,12 +456,10 @@ public class DataAccessImpl2 implements DataAccess {
         }).flatMap(batch -> rxSession.execute(batch).map(resultSet -> batch.size()));
     }
 
-    @Override
     public Observable<ResultSet> findMetricsInMetricsIndex(String tenantId, MetricType type) {
         return rxSession.execute(readMetricsIndex.bind(tenantId, type.getCode()));
     }
 
-    @Override
     public Observable<Integer> insertData(Metric<Double> gauge, int ttl) {
         return Observable.from(gauge.getDataPoints())
                 .map(dataPoint -> bindDataPoint(insertGaugeData, gauge, dataPoint, ttl))
@@ -471,7 +467,6 @@ public class DataAccessImpl2 implements DataAccess {
                 .flatMap(batch -> rxSession.execute(batch).map(resultSet -> batch.size()));
     }
 
-    @Override
     public Observable<Integer> insertCounterData(Metric<Long> counter, int ttl) {
         return Observable.from(counter.getDataPoints())
                 .map(dataPoint -> bindDataPoint(insertCounterData, counter, dataPoint, ttl))
@@ -482,29 +477,27 @@ public class DataAccessImpl2 implements DataAccess {
     private BoundStatement bindDataPoint(PreparedStatement statement, Metric<?> metric, DataPoint<?> dataPoint,
             int ttl) {
         return statement.bind(ttl, metric.getTags(), dataPoint.getValue(), metric.getTenantId(),
-                metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString(), hashedDpart(dataPoint.getTimestamp()),
+                metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
+                hashedDpart(dataPoint.getTimestamp()),
                 getTimeUUID(dataPoint.getTimestamp()));
     }
 
-    @Override
-    public Observable<ResultSet> findData(String tenantId, MetricId id, MetricType type, long startTime, long endTime) {
+    public ListenableFuture<List<ResultSet>> findData(String tenantId, MetricId id, MetricType type, long startTime,
+            long endTime) {
         return findData(tenantId, id, type, startTime, endTime, false);
     }
 
-    @Override
-    public Observable<ResultSet> findCounterData(String tenantId, MetricId id, long startTime, long endTime) {
+    public ListenableFuture<List<ResultSet>> findCounterData(String tenantId, MetricId id, long startTime, long endTime) {
         List<ResultSetFuture> futures = new ArrayList<ResultSetFuture>();
         for (long dpart : dpartRangeDESC(startTime, endTime)) {
             futures.add(session.executeAsync(findCounterDataExclusive.bind(tenantId, COUNTER.getCode(), id.getName(),
                     id.getInterval().toString(), dpart, UUIDs.startOf(startTime), UUIDs.endOf(endTime))));
         }
-        Scheduler scheduler = Schedulers.io();
-        List<Observable<ResultSet>> observables = Lists.transform(futures, (ResultSetFuture future) -> Observable.from(future, scheduler));
-        return Observable.merge(observables);
+
+        return Futures.successfulAsList(futures);
     }
 
-    @Override
-    public Observable<ResultSet> findData(Metric<Double> metric, long startTime, long endTime, Order
+    public ListenableFuture<List<ResultSet>> findData(Metric<Double> metric, long startTime, long endTime, Order
             order) {
         List<ResultSetFuture> futures = new ArrayList<ResultSetFuture>();
         if (order == Order.ASC) {
@@ -520,13 +513,12 @@ public class DataAccessImpl2 implements DataAccess {
                         dpart, getTimeUUID(startTime), getTimeUUID(endTime))));
             }
         }
-        Scheduler scheduler = Schedulers.io();
-        List<Observable<ResultSet>> observables = Lists.transform(futures, (ResultSetFuture future) -> Observable.from(future, scheduler));
-        return Observable.merge(observables);
+
+        return Futures.successfulAsList(futures);
     }
 
-    @Override
-    public Observable<ResultSet> findData(String tenantId, MetricId id, MetricType type, long startTime, long endTime,
+    public ListenableFuture<List<ResultSet>> findData(String tenantId, MetricId id, MetricType type, long startTime,
+            long endTime,
             boolean includeWriteTime) {
         List<ResultSetFuture> futures = new ArrayList<ResultSetFuture>();
         if (includeWriteTime) {
@@ -543,12 +535,10 @@ public class DataAccessImpl2 implements DataAccess {
                         id.getInterval().toString(), dpart, getTimeUUID(startTime), getTimeUUID(endTime))));
             }
         }
-        Scheduler scheduler = Schedulers.io();
-        List<Observable<ResultSet>> observables = Lists.transform(futures, (ResultSetFuture future) -> Observable.from(future, scheduler));
-        return Observable.merge(observables);
+
+        return Futures.successfulAsList(futures);
     }
 
-    @Override
     public Observable<ResultSet> findData(Metric<Double> metric, long timestamp,
             boolean includeWriteTime) {
         if (includeWriteTime) {
@@ -562,14 +552,14 @@ public class DataAccessImpl2 implements DataAccess {
         }
     }
 
-    @Override
-    public Observable<ResultSet> findAvailabilityData(Metric<AvailabilityType> metric, long startTime, long
+    public ListenableFuture<List<ResultSet>> findAvailabilityData(Metric<AvailabilityType> metric, long startTime,
+            long
             endTime) {
         return findAvailabilityData(metric, startTime, endTime, false);
     }
 
-    @Override
-    public Observable<ResultSet> findAvailabilityData(Metric<AvailabilityType> metric, long startTime, long
+    public ListenableFuture<List<ResultSet>> findAvailabilityData(Metric<AvailabilityType> metric, long startTime,
+            long
             endTime, boolean
             includeWriteTime) {
         List<ResultSetFuture> futures = new ArrayList<ResultSetFuture>();
@@ -588,43 +578,38 @@ public class DataAccessImpl2 implements DataAccess {
                         getTimeUUID(endTime))));
             }
         }
-        Scheduler scheduler = Schedulers.io();
-        List<Observable<ResultSet>> observables = Lists.transform(futures, (ResultSetFuture future) -> Observable.from(future, scheduler));
-        return Observable.merge(observables);
+
+        return Futures.successfulAsList(futures);
     }
 
-    @Override
     public Observable<ResultSet> findAvailabilityData(Metric<AvailabilityType> metric, long timestamp) {
         return rxSession.execute(findAvailabilityByDateRangeInclusive.bind(metric.getTenantId(),
                 MetricType.AVAILABILITY.getCode(), metric.getId().getName(), metric.getId().getInterval().toString(),
                 hashedDpart(timestamp), UUIDs.startOf(timestamp), UUIDs.endOf(timestamp)));
     }
 
-    @Override
     public Observable<ResultSet> deleteGaugeMetric(String tenantId, String metric, Interval interval, long dpart) {
         return rxSession.execute(deleteGaugeMetric.bind(tenantId, MetricType.GAUGE.getCode(), metric,
                 interval.toString(), dpart));
     }
 
-    @Override
     public Observable<ResultSet> findAllGaugeMetrics() {
         return rxSession.execute(findGaugeMetrics.bind());
     }
 
-    @Override
     public Observable<ResultSet> insertGaugeTag(String tag, String tagValue, Metric<Double> metric,
             Observable<TTLDataPoint<Double>> data) {
         return data.reduce(
-            new BatchStatement(UNLOGGED),
-            (batch, d) -> {
-                batch.add(insertGaugeTags.bind(metric.getTenantId(), tag, tagValue, MetricType.GAUGE.getCode(), metric
-                    .getId().getName(), metric.getId().getInterval().toString(),
-                        getTimeUUID(d.getDataPoint().getTimestamp()), d.getDataPoint().getValue(), d.getTTL()));
-                return batch;
-            }).flatMap(rxSession::execute);
+                new BatchStatement(UNLOGGED),
+                (batch, d) -> {
+                    batch.add(insertGaugeTags.bind(metric.getTenantId(), tag, tagValue, MetricType.GAUGE.getCode(),
+                            metric
+                                    .getId().getName(), metric.getId().getInterval().toString(),
+                            getTimeUUID(d.getDataPoint().getTimestamp()), d.getDataPoint().getValue(), d.getTTL()));
+                    return batch;
+                }).flatMap(rxSession::execute);
     }
 
-    @Override
     public Observable<ResultSet> insertAvailabilityTag(String tag, String tagValue,
             Metric<AvailabilityType> metric, Observable<TTLDataPoint<AvailabilityType>> data) {
         return data.reduce(
@@ -638,99 +623,94 @@ public class DataAccessImpl2 implements DataAccess {
                 }).flatMap(rxSession::execute);
     }
 
-    @Override
     public Observable<ResultSet> updateDataWithTag(Metric metric, DataPoint dataPoint, Map<String, String> tags) {
-        return rxSession.execute(updateDataWithTags.bind(tags, metric.getTenantId(), metric.getType().getCode(), metric
-                        .getId().getName(), metric.getId().getInterval().toString(), hashedDpart(dataPoint.getTimestamp()),
+        return rxSession.execute(updateDataWithTags.bind(tags, metric.getTenantId(), metric.getType().getCode(),
+                metric
+                .getId().getName(), metric.getId().getInterval().toString(),
+                hashedDpart(dataPoint.getTimestamp()),
                 getTimeUUID(dataPoint.getTimestamp())));
     }
 
-    @Override
     public Observable<ResultSet> findGaugeDataByTag(String tenantId, String tag, String tagValue) {
         return rxSession.execute(findGaugeDataByTag.bind(tenantId, tag, tagValue));
     }
 
-    @Override
     public Observable<ResultSet> findAvailabilityByTag(String tenantId, String tag, String tagValue) {
         return rxSession.execute(findAvailabilityByTag.bind(tenantId, tag, tagValue));
     }
 
-    @Override
     public Observable<Integer> insertAvailabilityData(Metric<AvailabilityType> metric, int ttl) {
-        return Observable.from(metric.getDataPoints())
-                .reduce(new BatchStatement(UNLOGGED), (batchStatement, a) -> {
-                    batchStatement.add(insertAvailability.bind(ttl, metric.getTags(), getBytes(a),
-                        metric.getTenantId(), metric.getType().getCode(), metric.getId().getName(), metric.getId()
-                            .getInterval().toString(), hashedDpart(a.getTimestamp()), getTimeUUID(a.getTimestamp())));
-                    return batchStatement;
-                })
+        return Observable
+                .from(metric.getDataPoints())
+                .reduce(new BatchStatement(UNLOGGED),
+                        (batchStatement, a) -> {
+                            batchStatement.add(insertAvailability.bind(ttl, metric.getTags(), getBytes(a),
+                                    metric.getTenantId(), metric.getType().getCode(), metric.getId().getName(), metric
+                                            .getId()
+                                            .getInterval().toString(), hashedDpart(a.getTimestamp()),
+                                    getTimeUUID(a.getTimestamp())));
+                            return batchStatement;
+                        })
                 .flatMap(batch -> rxSession.execute(batch).map(resultSet -> batch.size()));
     }
 
     private ByteBuffer getBytes(DataPoint<AvailabilityType> dataPoint) {
-        return ByteBuffer.wrap(new byte[]{dataPoint.getValue().getCode()});
+        return ByteBuffer.wrap(new byte[] { dataPoint.getValue().getCode() });
     }
 
-    @Override
-    public Observable<ResultSet> findAvailabilityData(String tenantId, MetricId id, long startTime, long endTime) {
+    public ListenableFuture<List<ResultSet>> findAvailabilityData(String tenantId, MetricId id, long startTime,
+            long endTime) {
         List<ResultSetFuture> futures = new ArrayList<ResultSetFuture>();
         for (long dpart : dpartRangeASC(startTime, endTime)) {
             futures.add(session.executeAsync(findAvailabilities.bind(tenantId, MetricType.AVAILABILITY.getCode(),
                     id.getName(), id
-                            .getInterval().toString(), dpart, getTimeUUID(startTime), getTimeUUID(endTime))));
+                    .getInterval().toString(), dpart, getTimeUUID(startTime), getTimeUUID(endTime))));
         }
 
-        Scheduler scheduler = Schedulers.io();
-        List<Observable<ResultSet>> observables = Lists.transform(futures, (ResultSetFuture future) -> Observable.from(future, scheduler));
-        return Observable.merge(observables);
+        return Futures.successfulAsList(futures);
     }
 
-    @Override
     public ResultSetFuture findDataRetentions(String tenantId, MetricType type) {
         return session.executeAsync(findDataRetentions.bind(tenantId, type.getCode()));
     }
 
-    @Override
     public ResultSetFuture updateRetentionsIndex(String tenantId, MetricType type, Set<Retention> retentions) {
         BatchStatement batchStatement = new BatchStatement(UNLOGGED);
         for (Retention r : retentions) {
-            batchStatement.add(updateRetentionsIndex.bind(tenantId, type.getCode(), r.getId().getInterval().toString(),
-                r.getId().getName(), r.getValue()));
+            batchStatement.add(updateRetentionsIndex.bind(tenantId, type.getCode(),
+                    r.getId().getInterval().toString(),
+                    r.getId().getName(), r.getValue()));
         }
         return session.executeAsync(batchStatement);
     }
 
-    @Override
     public Observable<ResultSet> insertIntoMetricsTagsIndex(Metric metric, Map<String, String> tags) {
         return executeTagsBatch(tags, (name, value) -> insertMetricsTagsIndex.bind(metric.getTenantId(), name, value,
                 metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString()));
     }
 
-    @Override
     public Observable<ResultSet> deleteFromMetricsTagsIndex(Metric metric, Map<String, String> tags) {
         return executeTagsBatch(tags, (name, value) -> deleteMetricsTagsIndex.bind(metric.getTenantId(), name, value,
                 metric.getType().getCode(), metric.getId().getName(), metric.getId().getInterval().toString()));
     }
 
     private Observable<ResultSet> executeTagsBatch(Map<String, String> tags,
-                                                   BiFunction<String, String, BoundStatement> bindVars) {
+            BiFunction<String, String, BoundStatement> bindVars) {
         BatchStatement batchStatement = new BatchStatement(UNLOGGED);
-        tags.entrySet().stream().forEach(entry -> batchStatement.add(bindVars.apply(entry.getKey(), entry.getValue())));
+        tags.entrySet().stream()
+                .forEach(entry -> batchStatement.add(bindVars.apply(entry.getKey(), entry.getValue())));
         return rxSession.execute(batchStatement);
     }
 
-    @Override
     public Observable<ResultSet> findMetricsByTag(String tenantId, String tag) {
         return rxSession.execute(findMetricsByTagName.bind(tenantId, tag));
     }
 
-    @Override
     public Observable<ResultSet> findMetricsFromTagsIndex(String tenantId, Map<String, String> tags) {
         return Observable.from(tags.entrySet())
                 .flatMap(e -> rxSession.execute(findMetricsFromTagsIndex.bind(tenantId, e.getKey(), e.getValue())));
     }
 
-    @Override
     public ResultSetFuture updateRetentionsIndex(Metric metric) {
         return session.executeAsync(updateRetentionsIndex.bind(metric.getTenantId(), metric.getType().getCode(),
                 metric.getId().getInterval().toString(), metric.getId().getName(), metric.getDataRetention()));
@@ -739,7 +719,7 @@ public class DataAccessImpl2 implements DataAccess {
     private KeyspaceMetadata getKeyspace() {
         return session.getCluster().getMetadata().getKeyspace(session.getLoggedKeyspace());
     }
-    
+
     private long hashedDpart(long time) {
         return time / timeSpan;
     }

@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.hawkular.metrics.core.api.Metric;
 import org.hawkular.metrics.core.api.MetricId;
-import org.hawkular.metrics.core.impl.DataAccessImpl3;
+import org.hawkular.metrics.core.impl.DataAccessImpl2;
 import org.hawkular.metrics.core.impl.Order;
 import org.joda.time.DateTime;
 
@@ -29,13 +29,13 @@ import com.google.common.util.concurrent.ListenableFuture;
 public class Solution2 {
     private static final Cluster cluster;
     private static final Session session;
-    private static final DataAccessImpl3 dataAccess;
+    private static final DataAccessImpl2 dataAccess;
     static {
         cluster = new Cluster.Builder()
         .addContactPoint("127.0.0.1")
         .build();
         session = cluster.connect("hawkularfork");
-        dataAccess = new DataAccessImpl3(session);
+        dataAccess = new DataAccessImpl2(session);
     }
 
     public static void main(String[] args) throws InterruptedException, ExecutionException {
